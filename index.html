@@ -79,21 +79,19 @@
       </label>
 
       <!-- Manual Data Entry -->
-      <div style="margin-top:22px;">
+      <div class="manual-entry">
         <label class="field-label">Manual Data Entry</label>
-        <p class="section-intro" style="margin-bottom:12px;">
+        <p class="section-intro manual-entry-hint">
           Enter column names (comma-separated) and one row of comma-separated numeric values per line.
         </p>
-        <div style="display:grid;grid-template-columns:1fr;gap:10px;">
-          <input type="text" id="manualColumns" placeholder="e.g. X1, X2, Y"
-            style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:0.9rem;outline:none;" />
-          <textarea id="manualRows" rows="6" placeholder="e.g.
+        <div class="manual-entry-grid">
+          <input type="text" id="manualColumns" class="manual-entry-input" placeholder="e.g. X1, X2, Y" />
+          <textarea id="manualRows" rows="6" class="manual-entry-textarea" placeholder="e.g.
 1, 2, 5
 2, 3, 8
-3, 5, 13"
-            style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:0.9rem;outline:none;font-family:'Courier New',monospace;resize:vertical;"></textarea>
+3, 5, 13"></textarea>
           <div>
-            <button class="btn btn-navy" onclick="loadManualData()" style="font-size:0.9rem;padding:10px 22px;">
+            <button class="btn btn-navy btn-manual-load" onclick="loadManualData()">
               ✏️ Load Manual Dataset
             </button>
           </div>
