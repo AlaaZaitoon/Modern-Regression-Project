@@ -628,56 +628,7 @@ footer strong{color:var(--gold2);}
   .card-body{padding:14px;}
   main{padding:16px 10px 32px;gap:16px;}
   .r2-num{font-size:2rem;}
-  .pred-val{font-size:1.9rem;}
 }
-
-/* ============================================================
-   STATS GRID
-   ============================================================ */
-.stat-box {
-  background:var(--white); border:1.5px solid var(--border);
-  border-radius:12px; overflow:hidden;
-  transition:box-shadow 0.2s;
-}
-.stat-box:hover{box-shadow:0 4px 16px rgba(27,42,94,0.1);}
-.stat-col-name {
-  background:linear-gradient(135deg,var(--navy),var(--navy3));
-  color:var(--white); padding:10px 14px;
-  font-size:0.82rem; font-weight:700;
-  border-bottom:2px solid var(--gold);
-}
-.stat-rows { padding:10px 14px; display:flex; flex-direction:column; gap:5px; }
-.stat-row {
-  display:flex; justify-content:space-between;
-  font-size:0.8rem; padding:4px 0;
-  border-bottom:1px solid var(--border);
-}
-.stat-row:last-child{border-bottom:none;}
-.stat-key { color:var(--muted); font-weight:600; }
-.stat-val { font-weight:700; color:var(--navy); }
-
-/* ============================================================
-   PREDICTION RESULT
-   ============================================================ */
-.pred-result {
-  background:linear-gradient(135deg,var(--navy),var(--navy3));
-  color:var(--white); border-radius:12px;
-  padding:20px 24px; text-align:center;
-  animation:countUp 0.5s ease;
-}
-.pred-val {
-  font-size:2.5rem; font-weight:900;
-  color:var(--gold3); margin-bottom:4px;
-}
-.pred-label { font-size:0.85rem; opacity:0.8; }
-
-/* ============================================================
-   CORRELATION TABLE
-   ============================================================ */
-.corr-high-pos { background:#d1fae5!important; color:#065f46; font-weight:700; }
-.corr-high-neg { background:#fee2e2!important; color:#991b1b; font-weight:700; }
-.corr-mid      { background:#fef3c7!important; color:#92400e; font-weight:600; }
-.corr-diag     { background:var(--navy)!important; color:white!important; font-weight:700; }
 
 /* ============================================================
    SECTION INTRO

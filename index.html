@@ -78,6 +78,28 @@
         <input type="file" id="csvFile" accept=".csv" style="display:none" onchange="handleFileUpload(event)"/>
       </label>
 
+      <!-- Manual Data Entry -->
+      <div style="margin-top:22px;">
+        <label class="field-label">Manual Data Entry</label>
+        <p class="section-intro" style="margin-bottom:12px;">
+          Enter column names (comma-separated) and one row of comma-separated numeric values per line.
+        </p>
+        <div style="display:grid;grid-template-columns:1fr;gap:10px;">
+          <input type="text" id="manualColumns" placeholder="e.g. X1, X2, Y"
+            style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:0.9rem;outline:none;" />
+          <textarea id="manualRows" rows="6" placeholder="e.g.
+1, 2, 5
+2, 3, 8
+3, 5, 13"
+            style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:0.9rem;outline:none;font-family:'Courier New',monospace;resize:vertical;"></textarea>
+          <div>
+            <button class="btn btn-navy" onclick="loadManualData()" style="font-size:0.9rem;padding:10px 22px;">
+              ✏️ Load Manual Dataset
+            </button>
+          </div>
+        </div>
+      </div>
+
       <div id="dataAlert" class="hidden"></div>
       <div id="loadingData" class="loading-overlay hidden">
         <div class="spinner"></div>
@@ -224,11 +246,6 @@
         <div class="table-wrap" id="ciTable"></div>
       </div>
 
-      <!-- Coefficients table -->
-      <div id="coefSection">
-        <label class="field-label">📊 Coefficients Table</label>
-        <div class="table-wrap" id="coefTable"></div>
-      </div>
     </div>
   </div>
 
@@ -263,21 +280,6 @@
           </div>
         </div>
       </div>
-    </div>
-  </div>
-
-  <!-- SECTION 6: PREDICTION TOOL -->
-  <div class="card hidden fade-in" id="sec-predict">
-    <div class="card-header">
-      <span class="icon">🔮</span> Prediction Tool — Enter New Values
-    </div>
-    <div class="card-body">
-      <p class="section-intro">Use the trained model to predict Y for new input values.</p>
-      <div id="predictInputs" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:20px;"></div>
-      <button class="btn btn-gold" onclick="makePrediction()" style="font-size:1rem;padding:12px 30px;">
-        🔮 Predict
-      </button>
-      <div id="predictResult" class="hidden" style="margin-top:18px;"></div>
     </div>
   </div>
 
