@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smart Regression & Data Insight System — HUE</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <!-- Chart.js for visualizations -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <!-- PapaParse for CSV parsing -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<link rel="icon" type="image/x-icon" href="team/x.jpeg"/>
+  <link rel="stylesheet" href="assets/css/app.css"/>
+</head>
+
+<body>
+
+<!-- ===================== HEADER ===================== -->
+<header>
+  <div class="header-top-bar"></div>
+  <div class="header-inner">
+    <div class="header-left">
+      <!-- HUE Logo — Real Image (embedded) -->
+      <img class="hue-svg-logo" src="assets/img/hue_logo.png" alt="Horus University Egypt" />
+      <div class="header-divider"></div>
+      <div class="header-title">
+        <h1>Smart Regression &amp; Data Insight System</h1>
+        <p>Intelligent Analysis · Linear Regression · Statistical Insights</p>
+      </div>
+    </div>
+    <div class="supervisor-badge">
+      <div class="sup-label">Course Instructor</div>
+      <div class="sup-name">Dr. Maha Hamed</div>
+      <div class="sup-dept">Faculty of AI &amp; Informatics</div>
+    </div>
+  </div>
+  <div class="header-bottom-bar"></div>
+</header>
+
+<!-- ===================== MAIN ===================== -->
+<main>
+
+  <!-- STEP PROGRESS -->
+  <div class="steps-card">
+    <div class="steps-wrap" id="stepsWrap">
+      <!-- Injected by JS -->
+    </div>
+  </div>
+
+  <!-- SECTION 1: DATA -->
+  <div class="card" id="sec-data">
+    <div class="card-header">
+      <span class="icon">📂</span> Step 1 — Data Section
+    </div>
+    <div class="card-body">
+      <p class="section-intro">Load a built-in dataset or upload your own CSV file to begin analysis.</p>
+
+      <label class="field-label">Built-in Datasets</label>
+      <div class="dataset-btns" style="margin-bottom:20px;">
+        <button class="ds-btn" onclick="loadBuiltIn('house_price')">🏠 House Price Prediction</button>
+        <button class="ds-btn" onclick="loadBuiltIn('car_price')">🚗 Car Price Prediction</button>
+      </div>
+
+      <label class="field-label">Upload Custom CSV</label>
+      <label class="upload-area" for="csvFile" id="uploadArea"
+        ondragover="event.preventDefault();this.classList.add('dragover')"
+        ondragleave="this.classList.remove('dragover')"
+        ondrop="handleDrop(event)">
+        <div class="upload-inner">
+          <div class="upload-icon-wrap">📂</div>
+          <div class="upload-main-text">
+            <span>Click to browse</span> or drag &amp; drop your file here
+          </div>
+          <div class="upload-sub-text">
+            Supported format: <span class="ext-badge">.CSV</span>
+          </div>
+        </div>
+        <input type="file" id="csvFile" accept=".csv" style="display:none" onchange="handleFileUpload(event)"/>
+      </label>
+
+      <div id="dataAlert" class="hidden"></div>
+      <div id="loadingData" class="loading-overlay hidden">
+        <div class="spinner"></div>
+        <p>Loading dataset...</p>
+      </div>
+
+      <div id="dataInfo" class="hidden" style="margin:14px 0;display:flex;gap:10px;flex-wrap:wrap;">
+        <span class="badge badge-navy" id="rowBadge"></span>
+        <span class="badge badge-gold" id="colBadge"></span>
+        <span class="badge badge-success" id="dsBadge"></span>
+      </div>
+
+      <div id="tableWrap" class="table-wrap hidden"></div>
+    </div>
+  </div>
+
+  <!-- SECTION 2: MODEL -->
+  <div class="card hidden fade-in" id="sec-model">
+    <div class="card-header">
+      <span class="icon">🧠</span> Step 2 — Model Section
+    </div>
+    <div class="card-body">
+      <p class="section-intro">Configure your regression model: choose type, variables, then train.</p>
+
+      <!-- Regression type -->
+      <div style="margin-bottom:22px;">
+        <label class="field-label">Regression Type</label>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+          <button class="btn btn-navy" id="btnSimple" onclick="setRegType('simple')">📈 Simple Linear</button>
+          <button class="btn" id="btnMultiple" onclick="setRegType('multiple')"
+            style="background:var(--bg);color:var(--navy);border:2px solid var(--border);">
+            📊 Multiple Linear
+          </button>
+        </div>
+        <p id="regTypeHint" style="font-size:0.78rem;color:var(--muted);margin-top:8px;">
+          One input (X) → One output (Y)
+        </p>
+      </div>
+
+      <!-- X variables -->
+      <div style="margin-bottom:22px;">
+        <label class="field-label">Input Variables — X <span id="xHint" style="color:var(--gold);font-weight:500;text-transform:none;">(select one)</span></label>
+        <div class="pills" id="xPills"></div>
+      </div>
+
+      <!-- Y variable -->
+      <div style="margin-bottom:26px;">
+        <label class="field-label">Output Variable — Y (Target)</label>
+        <select id="ySelect">
+          <option value="">-- Select Y variable --</option>
+        </select>
+      </div>
+
+      <div id="modelAlert" class="hidden"></div>
+
+      <button class="btn btn-gold" id="trainBtn" onclick="trainModel()" style="font-size:1rem;padding:13px 36px;">
+        🚀 Train Model
+      </button>
+    </div>
+  </div>
+
+  <!-- SECTION 3: VISUALIZATION -->
+  <div class="card hidden fade-in" id="sec-viz">
+    <div class="card-header">
+      <span class="icon">📈</span> Step 3 — Visualization Section
+    </div>
+    <div class="card-body">
+      <div class="charts-grid">
+        <div class="chart-box">
+          <div class="chart-title">📍 Scatter Plot + Regression Line</div>
+          <canvas id="scatterChart" class="chart-canvas" height="260"></canvas>
+        </div>
+        <div class="chart-box">
+          <div class="chart-title">🎯 Actual vs Predicted</div>
+          <canvas id="avpChart" class="chart-canvas" height="260"></canvas>
+        </div>
+        <div class="chart-box full">
+          <div class="chart-title">📊 Residuals — Error Distribution</div>
+          <canvas id="residualChart" class="chart-canvas" height="200"></canvas>
+          <div style="display:flex;gap:16px;margin-top:10px;font-size:0.76rem;color:var(--muted);flex-wrap:wrap;">
+            <span>■ <span style="color:var(--navy);font-weight:700;">Navy</span> = Under-predicted</span>
+            <span>■ <span style="color:var(--gold);font-weight:700;">Gold</span> = Over-predicted</span>
+            <span>Bars close to zero = better accuracy</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 4: EVALUATION -->
+  <div class="card hidden fade-in" id="sec-eval">
+    <div class="card-header">
+      <span class="icon">📋</span> Step 4 — Evaluation Section
+    </div>
+    <div class="card-body">
+      <!-- R² block -->
+      <div class="r2-block" id="r2Block">
+        <div>
+          <div class="r2-num" id="r2Val"></div>
+          <div style="font-size:0.75rem;color:var(--muted);text-transform:uppercase;font-weight:700;">R² Score</div>
+        </div>
+        <div style="flex:1;min-width:200px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:7px;">
+            <span id="r2Label" style="font-weight:800;font-size:0.95rem;"></span>
+            <span id="r2Pct" style="font-weight:800;"></span>
+          </div>
+          <div class="r2-bar-bg">
+            <div class="r2-bar-fill" id="r2Bar"></div>
+          </div>
+          <div id="r2Desc" style="font-size:0.78rem;color:var(--muted);margin-top:6px;"></div>
+        </div>
+      </div>
+
+      <!-- MSE / RMSE -->
+      <div class="metrics-row" id="metricsRow"></div>
+
+      <!-- Equation -->
+      <div style="margin-bottom:22px;">
+        <label class="field-label">📐 Regression Equation</label>
+        <div class="equation-box" id="equationBox"></div>
+      </div>
+
+      <!-- Standard Error -->
+      <div style="margin-bottom:22px;">
+        <label class="field-label">📊 Standard Error of Estimate (SE)</label>
+        <div class="se-box" id="seBox"></div>
+      </div>
+
+      <!-- ANOVA Table -->
+      <div style="margin-bottom:22px;">
+        <label class="field-label">📋 ANOVA Table — Analysis of Variance</label>
+        <div class="table-wrap" id="anovaTable"></div>
+      </div>
+
+      <!-- t-Test Results -->
+      <div style="margin-bottom:22px;">
+        <label class="field-label">🔬 Hypothesis Testing — t-Test for Coefficients (α = 0.05)</label>
+        <div class="table-wrap" id="tTestTable"></div>
+      </div>
+
+      <!-- Confidence Intervals -->
+      <div style="margin-bottom:22px;">
+        <label class="field-label">📐 Confidence Intervals for Coefficients (95%)</label>
+        <div class="table-wrap" id="ciTable"></div>
+      </div>
+
+      <!-- Coefficients table -->
+      <div id="coefSection">
+        <label class="field-label">📊 Coefficients Table</label>
+        <div class="table-wrap" id="coefTable"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 5: RECOMMENDATIONS -->
+  <div class="card hidden fade-in" id="sec-rec">
+    <div class="card-header">
+      <span class="icon">💬</span> Step 5 — Intelligent Recommendations
+    </div>
+    <div class="card-body">
+      <div id="recToggle" style="text-align:center;padding:20px 0;">
+        <p style="color:var(--muted);font-size:0.9rem;margin-bottom:16px;">
+          Click the button to get intelligent AI-powered insights about your model and data.
+        </p>
+        <button class="btn btn-gold" onclick="showRecs()" style="font-size:1rem;padding:13px 32px;">
+          🔍 Show Recommendations
+        </button>
+      </div>
+      <div id="recContent" class="hidden">
+        <div class="rec-list" id="recList"></div>
+        <div style="margin-top:20px;background:var(--bg);border-radius:12px;padding:18px;">
+          <div style="font-weight:800;color:var(--navy);margin-bottom:10px;font-size:0.88rem;">📚 R² Score Guide</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <div style="background:#d1fae5;border:1.5px solid var(--success);border-radius:8px;padding:8px 14px;font-size:0.8rem;">
+              <span style="font-weight:800;color:var(--success);">R² ≥ 0.85</span> → Excellent Fit
+            </div>
+            <div style="background:#fef3c7;border:1.5px solid var(--warning);border-radius:8px;padding:8px 14px;font-size:0.8rem;">
+              <span style="font-weight:800;color:var(--warning);">0.60 – 0.84</span> → Moderate Fit
+            </div>
+            <div style="background:#fee2e2;border:1.5px solid var(--danger);border-radius:8px;padding:8px 14px;font-size:0.8rem;">
+              <span style="font-weight:800;color:var(--danger);">R² &lt; 0.60</span> → Weak Fit
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 6: PREDICTION TOOL -->
+  <div class="card hidden fade-in" id="sec-predict">
+    <div class="card-header">
+      <span class="icon">🔮</span> Prediction Tool — Enter New Values
+    </div>
+    <div class="card-body">
+      <p class="section-intro">Use the trained model to predict Y for new input values.</p>
+      <div id="predictInputs" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:20px;"></div>
+      <button class="btn btn-gold" onclick="makePrediction()" style="font-size:1rem;padding:12px 30px;">
+        🔮 Predict
+      </button>
+      <div id="predictResult" class="hidden" style="margin-top:18px;"></div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ===================== FOOTER ===================== -->
+<footer>
+  <p>© 2025 <strong>Horus University — Egypt</strong> &nbsp;·&nbsp; Faculty of AI &amp; Informatics &nbsp;·&nbsp; Course Instructor: <strong>Dr. Maha Hamed</strong> &nbsp;·&nbsp; Smart Regression &amp; Data Insight System</p>
+</footer>
+
+<!-- ===================== JAVASCRIPT ===================== -->
+<script src="assets/js/app.js"></script>
+</body>
+</html>
