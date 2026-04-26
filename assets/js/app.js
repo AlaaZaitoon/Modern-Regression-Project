@@ -214,9 +214,9 @@ function renderSteps(current) {
 }
 
 // ============================================================
-// DATA LOADING — BUILT-IN (via backend API)
+// DATA LOADING — BUILT-IN (pure client-side, no backend)
 // ============================================================
-async function loadBuiltIn(id) {
+function loadBuiltIn(id) {
   showLoading(true);
   clearAlert('dataAlert');
   STATE.activeDataset = id;
@@ -225,21 +225,50 @@ async function loadBuiltIn(id) {
   document.querySelectorAll('.ds-btn').forEach(b => b.classList.remove('active'));
   document.querySelector(`.ds-btn[onclick*="'${id}'"]`)?.classList.add('active');
 
-  try {
-    const res = await fetch('/load_dataset', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({dataset_id: id})
-    });
-    if (!res.ok) throw new Error('Server error');
-    const json = await res.json();
-    handleDataLoaded(json);
-  } catch(e) {
-    // Fallback: use built-in sample data
-    const sample = id === 'house_price' ? HOUSE_DATA : CAR_DATA;
-    handleDataLoaded(sample);
-  }
+  const sample = id === 'house_price' ? HOUSE_DATA : CAR_DATA;
+  handleDataLoaded(sample);
   showLoading(false);
+}
+
+// ============================================================
+// DATA LOADING — MANUAL ENTRY
+// ============================================================
+function loadManualData() {
+  clearAlert('dataAlert');
+  const colsRaw = (document.getElementById('manualColumns').value || '').trim();
+  const rowsRaw = (document.getElementById('manualRows').value || '').trim();
+  if (!colsRaw || !rowsRaw) {
+    showAlert('dataAlert', '⚠️ Please provide both column names and at least one row.', 'danger');
+    return;
+  }
+  const columns = colsRaw.split(',').map(s => s.trim()).filter(Boolean);
+  const lines   = rowsRaw.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  const rows = [];
+  for (const line of lines) {
+    const parts = line.split(',').map(s => s.trim());
+    if (parts.length !== columns.length) {
+      showAlert('dataAlert',
+        `⚠️ Row "${line}" has ${parts.length} values but ${columns.length} columns are defined.`, 'danger');
+      return;
+    }
+    const row = {};
+    for (let i = 0; i < columns.length; i++) {
+      const v = parseFloat(parts[i]);
+      if (Number.isNaN(v)) {
+        showAlert('dataAlert', `⚠️ Non-numeric value "${parts[i]}" in row "${line}".`, 'danger');
+        return;
+      }
+      row[columns[i]] = v;
+    }
+    rows.push(row);
+  }
+  if (rows.length < 3) {
+    showAlert('dataAlert', '⚠️ Provide at least 3 rows of data.', 'danger');
+    return;
+  }
+  STATE.activeDataset = 'manual';
+  document.querySelectorAll('.ds-btn').forEach(b => b.classList.remove('active'));
+  handleDataLoaded({ columns, rows, shape: [rows.length, columns.length] });
 }
 
 // ============================================================
@@ -301,7 +330,8 @@ function handleDataLoaded(json) {
   document.getElementById('colBadge').textContent = `🔢 ${json.shape[1]} columns`;
   document.getElementById('dsBadge').textContent  =
     STATE.activeDataset === 'house_price' ? '🏠 House Price Dataset' :
-    STATE.activeDataset === 'car_price'   ? '🚗 Car Price Dataset'   : '📁 Custom Dataset';
+    STATE.activeDataset === 'car_price'   ? '🚗 Car Price Dataset'   :
+    STATE.activeDataset === 'manual'      ? '✏️ Manual Dataset'      : '📁 Custom Dataset';
 
   // Table
   renderTable(json.columns, json.rows);
@@ -411,7 +441,7 @@ function renderYSelect() {
 // ============================================================
 // TRAIN MODEL
 // ============================================================
-async function trainModel() {
+function trainModel() {
   STATE.yCol = document.getElementById('ySelect').value;
 
   if (STATE.xCols.length === 0) {
@@ -429,25 +459,15 @@ async function trainModel() {
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span> Training...';
 
-  try {
-    const res = await fetch('/train', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        x_columns: STATE.xCols,
-        y_column:  STATE.yCol,
-        regression_type: STATE.regType
-      })
-    });
-    if (!res.ok) throw new Error('Server error');
-    const json = await res.json();
+  // Pure client-side LSE computation (no backend).
+  const json = computeLocalRegression();
+  if (json) {
     STATE.results = json;
     renderResults(json);
-  } catch(e) {
-    // Fallback: compute locally
-    const json = computeLocalRegression();
-    if (json) { STATE.results = json; renderResults(json); }
-    else showAlert('modelAlert','⚠️ Training failed. Make sure the Flask backend is running.','danger');
+  } else {
+    showAlert('modelAlert',
+      '⚠️ Training failed. Check that selected columns are numeric and that you have enough rows (n > p + 1).',
+      'danger');
   }
 
   btn.disabled = false;
@@ -802,21 +822,6 @@ function renderEvaluation(json) {
     document.getElementById('ciTable').innerHTML = ciHtml;
   }
 
-  // Coefficients table (basic)
-  let tbl = '<table><thead><tr><th>#</th><th>Variable</th><th>Coefficient</th><th>Interpretation</th></tr></thead><tbody>';
-  tbl += `<tr><td>β₀</td><td><strong>Intercept</strong></td><td>${intercept}</td><td style="color:var(--muted)">Base value when all inputs = 0</td></tr>`;
-  Object.entries(coefficients).forEach(([col,val],i) => {
-    const color = val>=0 ? '#10b981' : '#ef4444';
-    const sign  = val>=0 ? '+' : '';
-    tbl += `<tr>
-      <td>β${i+1}</td>
-      <td><strong>${col}</strong></td>
-      <td style="color:${color};font-weight:700">${sign}${val}</td>
-      <td style="color:var(--muted)">1 unit ↑ in <em>${col}</em> → ${sign}${val} in output</td>
-    </tr>`;
-  });
-  tbl += '</tbody></table>';
-  document.getElementById('coefTable').innerHTML = tbl;
 }
 
 // ============================================================
@@ -847,7 +852,31 @@ function showRecs() {
 
 
 // ============================================================
+// SIMPLE LINEAR REGRESSION — Explicit LSE Formulas (Syllabus)
+//   β1 = Σ((x - x̄)(y - ȳ)) / Σ(x - x̄)²
+//   β0 = ȳ - β1 · x̄
+// ============================================================
+function simpleLinearRegression(x, y) {
+  const n = x.length;
+  if (n === 0) return { beta0: 0, beta1: 0 };
+  let sumX = 0, sumY = 0;
+  for (let i = 0; i < n; i++) { sumX += x[i]; sumY += y[i]; }
+  const xMean = sumX / n;
+  const yMean = sumY / n;
+  let num = 0, den = 0;
+  for (let i = 0; i < n; i++) {
+    const dx = x[i] - xMean;
+    num += dx * (y[i] - yMean);
+    den += dx * dx;
+  }
+  const beta1 = den === 0 ? 0 : num / den;
+  const beta0 = yMean - beta1 * xMean;
+  return { beta0, beta1, xMean, yMean };
+}
+
+// ============================================================
 // MULTIPLE REGRESSION — OLS via Gauss-Jordan (pure JS)
+//   β = (Xᵀ X)⁻¹ Xᵀ y
 // ============================================================
 function multipleRegression(X, y) {
   const n = X.length;
@@ -910,8 +939,17 @@ function computeLocalRegression() {
     // Build X matrix with intercept column (1, x1, x2, ...)
     const Xmat = data.map(r => [1, ...xCols.map(c => parseFloat(r[c]))]);
 
-    // OLS solution: β = (X^T X)^-1 X^T y
-    const betas = multipleRegression(Xmat, y);
+    // Coefficients via Least Squares Estimation.
+    //  - p = 1 → use the explicit Simple Linear Regression formulas (syllabus).
+    //  - p ≥ 2 → use the matrix form β = (Xᵀ X)⁻¹ Xᵀ y (syllabus).
+    let betas;
+    if (p === 1) {
+      const xVals = data.map(r => parseFloat(r[xCols[0]]));
+      const { beta0, beta1 } = simpleLinearRegression(xVals, y);
+      betas = [beta0, beta1];
+    } else {
+      betas = multipleRegression(Xmat, y);
+    }
     const intercept = betas[0];
     const coefs     = betas.slice(1);
 
@@ -1003,12 +1041,10 @@ function computeLocalRegression() {
     });
 
     // ========== VISUALIZATION DATA ==========
-    const splitIdx = Math.floor(n*0.8);
-    const actual_vs_pred = data.slice(splitIdx).map((_,i)=>({
-      index:i, actual:y[splitIdx+i], predicted:yPred[splitIdx+i]
-    }));
+    // Use full dataset — no train/test split (not in syllabus).
+    const actual_vs_pred = y.map((yi, i) => ({ index: i, actual: yi, predicted: yPred[i] }));
 
-    const scatter_data = data.map((r,i)=>({
+    const scatter_data = data.map((r, i) => ({
       x: parseFloat(r[xCols[0]]), y: y[i], predicted: yPred[i]
     }));
 
@@ -1058,59 +1094,12 @@ function calculateXtXInverse(X) {
 }
 
 // ============================================================
-// PREDICTION TOOL
-// ============================================================
-function renderPredictInputs() {
-  const wrap = document.getElementById('predictInputs');
-  wrap.innerHTML = '';
-  STATE.xCols.forEach(col => {
-    const div = document.createElement('div');
-    div.innerHTML = `
-      <label class="field-label">${col}</label>
-      <input type="number" id="pred-${col}" placeholder="Enter ${col}" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:0.9rem;outline:none;" />`;
-    wrap.appendChild(div);
-  });
-}
-
-function makePrediction() {
-  if (!STATE.results) return;
-  const {coefficients, intercept} = STATE.results;
-  let pred = intercept;
-  let valid = true;
-  STATE.xCols.forEach(col => {
-    const val = parseFloat(document.getElementById(`pred-${col}`)?.value);
-    if (isNaN(val)) { valid=false; return; }
-    pred += (coefficients[col]||0) * val;
-  });
-  const res = document.getElementById('predictResult');
-  if (!valid) {
-    res.innerHTML = '<div class="alert alert-danger">⚠️ Please fill in all input values.</div>';
-    res.classList.remove('hidden');
-    return;
-  }
-  res.innerHTML = `
-    <div class="pred-result">
-      <div class="pred-label">Predicted ${STATE.yCol}</div>
-      <div class="pred-val">${pred.toLocaleString(undefined,{maximumFractionDigits:2})}</div>
-      <div class="pred-label" style="font-size:0.75rem;margin-top:6px;opacity:0.6;">
-        Using: ${STATE.xCols.map(c=>`${c}=${document.getElementById('pred-'+c).value}`).join(', ')}
-      </div>
-    </div>`;
-  res.classList.remove('hidden');
-}
-
-// ============================================================
 // RENDER RESULTS
 // ============================================================
 function renderResults(json) {
   renderCharts(json);
   renderEvaluation(json);
   renderRecommendations(json.recommendations);
-
-  // Show prediction tool
-  renderPredictInputs();
-  document.getElementById('sec-predict').classList.remove('hidden');
-  document.getElementById('predictResult').classList.add('hidden');
 
   ['sec-viz','sec-eval','sec-rec'].forEach(id =>
     document.getElementById(id).classList.remove('hidden'));
