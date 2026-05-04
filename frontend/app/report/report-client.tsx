@@ -100,7 +100,7 @@ export function ReportClient() {
         </div>
         <h2 className="text-3xl font-bold tracking-tight mb-3">No Model Loaded</h2>
         <p className="text-muted-foreground text-lg mb-8 max-w-md">
-          Reports are linked from the dashboard after training. Opening this route directly doesn't know which model to render.
+          Reports are linked from the dashboard after training. Opening this route directly does not know which model to render.
         </p>
         <Button asChild size="lg" className="rounded-full shadow-lg shadow-primary/20">
           <Link href="/">
