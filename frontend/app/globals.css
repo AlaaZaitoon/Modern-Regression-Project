@@ -16,95 +16,106 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 225 40% 12%;
+    /* Base background: A very soft, cool pearl white */
+    --background: 210 40% 98%; 
+    --foreground: 222 47% 11%;
 
+    /* Cards: Pure white with a hint of translucency for glass effects */
     --card: 0 0% 100%;
-    --card-foreground: 225 40% 12%;
+    --card-foreground: 222 47% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 225 40% 12%;
+    --popover-foreground: 222 47% 11%;
 
-    --primary: 225 57% 24%;
-    --primary-foreground: 0 0% 100%;
+    /* Primary: Vibrant Indigo/Violet blend */
+    --primary: 250 85% 60%;
+    --primary-foreground: 210 40% 98%;
 
-    --secondary: 225 20% 96%;
-    --secondary-foreground: 225 40% 20%;
+    /* Secondary: Soft Rose/Pink */
+    --secondary: 340 82% 92%;
+    --secondary-foreground: 340 65% 35%;
 
-    --muted: 225 15% 94%;
-    --muted-foreground: 225 10% 40%;
+    /* Muted: Soft blue-gray */
+    --muted: 214 32% 91%;
+    --muted-foreground: 215 16% 47%;
 
-    --accent: 41 64% 47%;
-    --accent-foreground: 0 0% 100%;
+    /* Accent: Electric Cyan/Teal for highlights */
+    --accent: 185 81% 45%;
+    --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 72% 45%;
-    --destructive-foreground: 0 0% 100%;
+    /* Destructive: Bright Crimson */
+    --destructive: 348 83% 53%;
+    --destructive-foreground: 210 40% 98%;
 
-    --success: 142 55% 38%;
-    --success-foreground: 0 0% 100%;
+    /* Success: Emerald Green */
+    --success: 158 64% 45%;
+    --success-foreground: 210 40% 98%;
 
-    --warning: 38 92% 48%;
-    --warning-foreground: 225 40% 12%;
+    /* Warning: Golden Amber */
+    --warning: 45 93% 47%;
+    --warning-foreground: 222 47% 11%;
 
-    --border: 225 15% 88%;
-    --input: 225 15% 88%;
-    --ring: 225 57% 24%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 250 85% 60%;
 
-    --brand-navy: 225 57% 24%;
-    --brand-gold: 41 64% 47%;
+    /* Chart colors: A vibrant, diverse palette (Indigo, Rose, Amber, Emerald, Cyan) */
+    --chart-1: 250 85% 60%;
+    --chart-2: 340 82% 58%;
+    --chart-3: 45 93% 47%;
+    --chart-4: 158 64% 45%;
+    --chart-5: 185 81% 45%;
 
-    --chart-1: 225 57% 40%;
-    --chart-2: 41 64% 47%;
-    --chart-3: 142 55% 38%;
-    --chart-4: 0 72% 55%;
-    --chart-5: 268 45% 55%;
-
-    --radius: 0.625rem;
+    --radius: 1rem; /* Highly rounded, modern pill-like corners */
   }
 
   .dark {
-    --background: 225 35% 7%;
-    --foreground: 225 15% 94%;
+    /* Deep Space background (almost black, slight violet tint) */
+    --background: 240 10% 4%;
+    --foreground: 210 40% 98%;
 
-    --card: 225 30% 10%;
-    --card-foreground: 225 15% 94%;
+    /* Cards: Dark slate with slight transparency */
+    --card: 240 7% 8%;
+    --card-foreground: 210 40% 98%;
 
-    --popover: 225 30% 10%;
-    --popover-foreground: 225 15% 94%;
+    --popover: 240 7% 8%;
+    --popover-foreground: 210 40% 98%;
 
-    --primary: 225 65% 70%;
-    --primary-foreground: 225 40% 10%;
+    /* Primary: Electric Violet/Blue */
+    --primary: 250 100% 75%;
+    --primary-foreground: 240 10% 4%;
 
-    --secondary: 225 20% 18%;
-    --secondary-foreground: 225 15% 94%;
+    /* Secondary: Deep Rose/Pink */
+    --secondary: 340 65% 25%;
+    --secondary-foreground: 340 82% 92%;
 
-    --muted: 225 20% 16%;
-    --muted-foreground: 225 12% 65%;
+    /* Muted: Dark gray-violet */
+    --muted: 240 5% 15%;
+    --muted-foreground: 240 5% 65%;
 
-    --accent: 41 70% 55%;
-    --accent-foreground: 225 40% 10%;
+    /* Accent: Neon Cyan */
+    --accent: 185 100% 65%;
+    --accent-foreground: 240 10% 4%;
 
-    --destructive: 0 62% 55%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 348 83% 53%;
+    --destructive-foreground: 210 40% 98%;
 
-    --success: 142 50% 55%;
-    --success-foreground: 225 40% 10%;
+    --success: 158 64% 50%;
+    --success-foreground: 210 40% 98%;
 
-    --warning: 38 85% 60%;
-    --warning-foreground: 225 40% 10%;
+    --warning: 45 93% 55%;
+    --warning-foreground: 240 10% 4%;
 
-    --border: 225 20% 22%;
-    --input: 225 20% 22%;
-    --ring: 225 65% 70%;
+    --border: 240 5% 15%;
+    --input: 240 5% 15%;
+    --ring: 250 100% 75%;
 
-    --brand-navy: 225 65% 70%;
-    --brand-gold: 41 70% 55%;
-
-    --chart-1: 225 65% 70%;
-    --chart-2: 41 70% 60%;
-    --chart-3: 142 50% 55%;
-    --chart-4: 0 70% 65%;
-    --chart-5: 268 55% 70%;
+    /* Chart colors: Neon diverse palette */
+    --chart-1: 250 100% 75%;
+    --chart-2: 340 100% 75%;
+    --chart-3: 45 100% 65%;
+    --chart-4: 158 100% 65%;
+    --chart-5: 185 100% 65%;
   }
 }
 
@@ -114,7 +125,7 @@
   }
   html,
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground selection:bg-primary/20 selection:text-primary;
   }
   body {
     font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1;
@@ -125,10 +136,75 @@
   .text-balance {
     text-wrap: balance;
   }
+  
+  /* Animated sleek background grid */
   .bg-grid-slate {
     background-image:
-      linear-gradient(hsl(var(--border) / 0.6) 1px, transparent 1px),
-      linear-gradient(90deg, hsl(var(--border) / 0.6) 1px, transparent 1px);
-    background-size: 56px 56px;
+      linear-gradient(to right, hsl(var(--primary) / 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(var(--primary) / 0.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+    mask-image: radial-gradient(circle at center, black, transparent 80%);
   }
+  
+  /* Glassmorphism utilities - Optimized for performance */
+  .glass {
+    @apply bg-background/80 backdrop-blur-md border border-white/10 dark:border-white/5 shadow-md;
+  }
+  
+  .glass-card {
+    @apply bg-card border border-primary/10 shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5;
+  }
+  
+  /* Beautiful animated text gradients */
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-secondary animate-gradient-x;
+  }
+  
+  /* Subtle glow effects */
+  .glow-primary {
+    box-shadow: 0 0 20px -5px hsl(var(--primary) / 0.3);
+  }
+}
+
+/* Custom Animation Keyframes */
+@keyframes gradient-x {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.animate-gradient-x {
+  animation: gradient-x 6s ease infinite;
+  background-size: 200% 200%;
+}
+
+/* Beautiful glowing moving border effect for important cards */
+.animated-border {
+  position: relative;
+  background-clip: padding-box;
+  border: 1px solid transparent;
+}
+.animated-border::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    hsl(var(--primary) / 0.5),
+    hsl(var(--accent) / 0.5),
+    hsl(var(--secondary) / 0.5),
+    hsl(var(--primary) / 0.5)
+  );
+  background-size: 300% 100%;
+  animation: gradient-x 6s linear infinite;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.animated-border:hover::before {
+  opacity: 1;
 }

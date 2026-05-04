@@ -20,7 +20,7 @@ export function StepUpload() {
     return (
       <section className="space-y-6 animate-fade-in">
         <header>
-          <h2 className="text-2xl font-semibold tracking-tight">Add a dataset</h2>
+          <h2 className="text-2xl font-semibold tracking-tight text-gradient">Add a dataset</h2>
           <p className="text-sm text-muted-foreground">
             Drop a CSV file or build a small dataset by hand to profile its schema,
             descriptive statistics, and pairwise correlations.

@@ -45,12 +45,23 @@ export function formatPValue(value: number | null | undefined): string {
 }
 
 /**
- * Short, human-friendly label for R-squared based on the standard
- * "weak / moderate / excellent" brackets used in the R2 gauge.
+ * Short, human-friendly label for R-squared based on a 5-tier classification
+ * aligned with Hair et al. (2011, 2013):
+ * "no_relation / poor / good / nearly_perfect / perfect"
+ *
+ *  R² = 1      → perfect fit (all points lie exactly on the regression line)
+ *  R² ≥ 0.75   → nearly perfect  (substantial — Hair et al.)
+ *  R² ≥ 0.50   → good            (moderate — Hair et al.)
+ *  R² ≥ 0.25   → poor            (weak — Hair et al.)
+ *  R² < 0.25   → no relation
  */
-export function r2Band(r2: number): "weak" | "moderate" | "excellent" {
-  if (!Number.isFinite(r2)) return "weak";
-  if (r2 < 0.5) return "weak";
-  if (r2 < 0.8) return "moderate";
-  return "excellent";
+export type R2Band = "no_relation" | "poor" | "good" | "nearly_perfect" | "perfect";
+
+export function r2Band(r2: number): R2Band {
+  if (!Number.isFinite(r2)) return "no_relation";
+  if (r2 >= 1.0) return "perfect";
+  if (r2 >= 0.75) return "nearly_perfect";
+  if (r2 >= 0.50) return "good";
+  if (r2 >= 0.25) return "poor";
+  return "no_relation";
 }

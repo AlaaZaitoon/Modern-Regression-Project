@@ -61,32 +61,50 @@ export function buildRecommendations(
 
   // 1. Overall fit quality from R² band.
   const band = r2Band(metrics.r2);
-  if (band === "excellent") {
+  if (band === "perfect") {
     recs.push({
       id: "fit",
       tone: "success",
       icon: CheckCircle2,
-      title: `Excellent fit — R² = ${formatPercent(metrics.r2, 2)}`,
+      title: `Perfect fit — R² = ${formatPercent(metrics.r2, 2)}`,
       description:
-        "The model explains a large share of the variance in the target. Residual diagnostics should still be checked before relying on the predictions.",
+        "The model explains 100% of the variance in the target. All data points lie exactly on the regression line.",
     });
-  } else if (band === "moderate") {
+  } else if (band === "nearly_perfect") {
+    recs.push({
+      id: "fit",
+      tone: "success",
+      icon: CheckCircle2,
+      title: `Nearly perfect fit — R² = ${formatPercent(metrics.r2, 2)}`,
+      description:
+        "The model explains a very large share of the variance in the target. Residual diagnostics should still be checked before relying on the predictions.",
+    });
+  } else if (band === "good") {
     recs.push({
       id: "fit",
       tone: "info",
       icon: TrendingUp,
-      title: `Moderate fit — R² = ${formatPercent(metrics.r2, 2)}`,
+      title: `Good fit — R² = ${formatPercent(metrics.r2, 2)}`,
       description:
-        "The model captures a useful portion of the variance but leaves meaningful structure unexplained. Consider adding predictors or reviewing data quality.",
+        "The model captures the main trend well but leaves some variance unexplained. Consider adding predictors or reviewing data quality for further improvement.",
     });
-  } else {
+  } else if (band === "poor") {
     recs.push({
       id: "fit",
       tone: "warning",
       icon: AlertTriangle,
-      title: `Weak fit — R² = ${formatPercent(metrics.r2, 2)}`,
+      title: `Poor fit — R² = ${formatPercent(metrics.r2, 2)}`,
       description:
-        "Less than half of the variance is explained. The current predictors may be insufficient or the relationship may not be linear.",
+        "The model captures some patterns but leaves substantial variance unexplained. Consider adding more predictors or investigating non-linear relationships.",
+    });
+  } else {
+    recs.push({
+      id: "fit",
+      tone: "destructive",
+      icon: XCircle,
+      title: `No linear relation — R² = ${formatPercent(metrics.r2, 2)}`,
+      description:
+        "Less than 25% of the variance is explained. The current predictors may be insufficient or the relationship may not be linear.",
     });
   }
 

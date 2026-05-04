@@ -8,6 +8,10 @@ setlocal
 
 set "ROOT=%~dp0"
 
+REM ── Cleanup Old Processes ──────────────────────────────────────
+echo [start.bat] Cleaning up old processes on ports 3000 and 8000...
+powershell -NoProfile -Command "$ports = 3000, 8000; foreach ($port in $ports) { $pids = (Get-NetTCPConnection -LocalPort $port -ErrorAction SilentlyContinue).OwningProcess; foreach ($p in $pids) { Stop-Process -Id $p -Force -ErrorAction SilentlyContinue } }"
+
 REM ── Backend Setup & Launch ─────────────────────────────────────
 echo.
 echo ========================================

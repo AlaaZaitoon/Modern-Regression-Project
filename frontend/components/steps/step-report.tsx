@@ -53,7 +53,7 @@ export function StepReport() {
             <div className="flex size-9 items-center justify-center rounded-md bg-primary/10 text-primary">
               <FileText className="size-5" aria-hidden />
             </div>
-            <h2 className="text-2xl font-semibold tracking-tight">Report &amp; export</h2>
+            <h2 className="text-2xl font-semibold tracking-tight text-gradient">Report &amp; export</h2>
           </div>
           <p className="mt-1 text-sm text-muted-foreground">
             Share a polished, ready-to-submit artifact.

@@ -147,6 +147,7 @@ export const trainResponseFixture: TrainResponse = {
     { index: 1, x_values: { YearsExperience: 1.3 }, y_actual: 46205, y_predicted: 38077.4, residual: 8127.6 },
     { index: 2, x_values: { YearsExperience: 1.5 }, y_actual: 37731, y_predicted: 39967.4, residual: -2236.4 },
   ],
+  sample_means: { YearsExperience: 5.31, Salary: 76003 },
   created_at: "2025-01-01T00:05:00Z",
 };
 

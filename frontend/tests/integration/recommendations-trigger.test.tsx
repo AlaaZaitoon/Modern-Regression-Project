@@ -32,8 +32,8 @@ describe("RecommendationsTrigger", () => {
     ).toBeInTheDocument();
 
     // The expanded panel hasn't been rendered yet, so its individual
-    // recommendation titles (e.g. "Excellent fit") are absent.
-    expect(screen.queryByText(/excellent fit/i)).not.toBeInTheDocument();
+    // recommendation titles (e.g. "Nearly perfect fit") are absent.
+    expect(screen.queryByText(/nearly perfect fit/i)).not.toBeInTheDocument();
     // And no "Hide recommendations" affordance is offered.
     expect(
       screen.queryByRole("button", { name: /hide recommendations/i }),
@@ -49,8 +49,8 @@ describe("RecommendationsTrigger", () => {
     );
 
     // The fixture has R² ≈ 0.957, so the first recommendation is
-    // "Excellent fit — R² = 95.7…%".
-    expect(await screen.findByText(/excellent fit/i)).toBeInTheDocument();
+    // "Nearly perfect fit — R² = 95.7…%".
+    expect(await screen.findByText(/nearly perfect fit/i)).toBeInTheDocument();
     // And the toggle now offers a "Hide recommendations" link.
     expect(
       screen.getByRole("button", { name: /hide recommendations/i }),

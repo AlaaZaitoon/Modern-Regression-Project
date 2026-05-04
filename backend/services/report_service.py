@@ -102,12 +102,16 @@ def build_pdf(payload: dict[str, Any], dataset_filename: str | None = None) -> b
     story.append(Paragraph("Metrics", h2))
     metric_rows = [
         ["R2", f"{m.r2:.6f}"],
-        ["Adjusted R2", f"{m.adj_r2:.6f}"],
+    ]
+    if model_type_str != "simple":
+        metric_rows.append(["Adjusted R2", f"{m.adj_r2:.6f}"])
+        
+    metric_rows.extend([
         ["MSE", f"{m.mse:.6f}"],
         ["RMSE", f"{m.rmse:.6f}"],
         ["MAE", f"{m.mae:.6f}"],
         ["SE (estimate)", f"{m.se:.6f}"],
-    ]
+    ])
     t = Table(metric_rows, hAlign="LEFT", colWidths=[4 * cm, 13 * cm])
     t.setStyle(_label_table_style(_GOLD))
     story.append(t)

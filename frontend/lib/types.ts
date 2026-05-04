@@ -156,6 +156,8 @@ export interface TrainResponse {
   correlation_matrix: CorrelationMatrix;
   cooks_distance: CookDistance[];
   predictions: PredictionRow[];
+  /** Sample means: { x_col: x̄, y_col: ȳ }. */
+  sample_means: Record<string, number>;
   created_at: string;
 }
 

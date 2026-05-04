@@ -53,55 +53,63 @@ const TEAM: TeamMember[] = [
 export default function AboutPage() {
   return (
     <div className="relative flex min-h-screen flex-col">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[320px] bg-gradient-to-b from-primary/10 via-transparent to-transparent"
-      />
+      {/* Clean, high-performance background */}
+      <div className="pointer-events-none absolute inset-0 -z-20 bg-background" />
+      <div className="bg-grid-slate pointer-events-none absolute inset-0 -z-10 opacity-60" />
+      
+      {/* Performant ambient glowing orbs without mix-blend-mode and smaller blur */}
+      <div aria-hidden className="pointer-events-none absolute -top-40 -left-40 -z-10 h-[500px] w-[500px] rounded-full bg-primary/10 blur-3xl dark:bg-primary/5" />
+      <div aria-hidden className="pointer-events-none absolute top-20 -right-40 -z-10 h-[400px] w-[400px] rounded-full bg-accent/10 blur-3xl dark:bg-accent/5" />
 
-      <header className="container sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background/80 backdrop-blur">
-        <Link href="/" className="flex items-center gap-2">
-          <Image
-            src="/hue-logo.png"
-            alt="Horus University Egypt"
-            width={32}
-            height={32}
-            className="rounded"
-            priority
-          />
-          <div className="leading-tight">
-            <div className="text-sm font-semibold tracking-tight">Smart Regression System</div>
-            <div className="text-xs text-muted-foreground">About</div>
+      <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-white/10 dark:border-white/5 glass">
+        <div className="container flex items-center justify-between">
+          <Link href="/" className="group flex items-center gap-3 transition-all hover:scale-[1.02]">
+            <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-lg shadow-primary/25 transition-transform group-hover:rotate-3">
+              <Image
+                src="/hue-logo.png"
+                alt="Horus University Egypt"
+                width={30}
+                height={30}
+                className="rounded"
+                priority
+              />
+            </div>
+            <div className="leading-tight">
+              <div className="text-sm font-bold tracking-tight text-foreground group-hover:text-gradient transition-colors duration-300">
+                Smart Regression System
+              </div>
+              <div className="text-[11px] font-medium text-muted-foreground">
+                About The Project
+              </div>
+            </div>
+          </Link>
+          <div className="flex items-center gap-4">
+            <HealthIndicator />
+            <ThemeToggle />
           </div>
-        </Link>
-        <div className="flex items-center gap-3">
-          <HealthIndicator />
-          <ThemeToggle />
         </div>
       </header>
 
-      <main className="container flex flex-1 flex-col gap-12 py-10">
+      <main className="container relative z-10 flex flex-1 flex-col gap-12 py-10">
         {/* Hero */}
         <section className="flex flex-col items-start gap-5">
-          <Button variant="outline" size="sm" asChild>
+          <Button variant="outline" size="sm" asChild className="glass-card border-none shadow-sm hover:shadow-md">
             <Link href="/">
               <ArrowLeft />
               Back to dashboard
             </Link>
           </Button>
-          <Badge variant="accent" className="uppercase tracking-wider">
+          <Badge variant="accent" className="uppercase tracking-wider shadow-sm shadow-accent/20">
             Academic Project · 2026
           </Badge>
           <h1 className="text-balance max-w-3xl text-4xl font-semibold tracking-tight md:text-5xl">
             Smart Regression &amp;{" "}
-            <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent animate-gradient-x">
               Data Insight System
             </span>
           </h1>
           <p className="max-w-2xl text-balance text-base text-muted-foreground md:text-lg">
-            A production-grade reimagining of a Modern Regression course project at Horus University
-            Egypt. The system implements Simple and Multiple Linear Regression with full statistical
-            inference — Least Squares Estimation, ANOVA, t-tests, 95% confidence intervals, and
-            diagnostic plots — delivered through a FastAPI backend and a Next.js 14 dashboard.
+            An enterprise-grade analytics platform born from the Modern Regression curriculum at Horus University Egypt. We transformed traditional statistical inference into a seamless digital experience. Powered by a high-performance FastAPI engine and a stunning Next.js 14 dashboard, the system delivers real-time Least Squares Estimation, ANOVA, rigorous hypothesis testing, and interactive diagnostic visualizations at scale.
           </p>
         </section>
 
@@ -111,9 +119,9 @@ export default function AboutPage() {
             Academic context
           </h2>
           <div className="grid gap-4 md:grid-cols-3">
-            <Card>
+            <Card className="glass-card border-primary/10">
               <CardHeader className="space-y-2">
-                <div className="flex size-9 items-center justify-center rounded-md bg-primary/10 text-primary">
+                <div className="flex size-9 items-center justify-center rounded-md bg-gradient-to-br from-primary/20 to-accent/20 text-primary">
                   <GraduationCap className="size-5" />
                 </div>
                 <CardTitle>University</CardTitle>
@@ -122,9 +130,9 @@ export default function AboutPage() {
                 </CardDescription>
               </CardHeader>
             </Card>
-            <Card>
+            <Card className="glass-card border-accent/10">
               <CardHeader className="space-y-2">
-                <div className="flex size-9 items-center justify-center rounded-md bg-primary/10 text-primary">
+                <div className="flex size-9 items-center justify-center rounded-md bg-gradient-to-br from-accent/20 to-secondary/20 text-accent">
                   <Sigma className="size-5" />
                 </div>
                 <CardTitle>Course</CardTitle>
@@ -133,9 +141,9 @@ export default function AboutPage() {
                 </CardDescription>
               </CardHeader>
             </Card>
-            <Card>
+            <Card className="glass-card border-secondary/10">
               <CardHeader className="space-y-2">
-                <div className="flex size-9 items-center justify-center rounded-md bg-primary/10 text-primary">
+                <div className="flex size-9 items-center justify-center rounded-md bg-gradient-to-br from-secondary/20 to-primary/20 text-secondary">
                   <Users className="size-5" />
                 </div>
                 <CardTitle>Team</CardTitle>
@@ -152,20 +160,18 @@ export default function AboutPage() {
           <h2 id="supervisor-heading" className="text-2xl font-semibold tracking-tight">
             Course instructor
           </h2>
-          <Card>
-            <CardContent className="flex flex-col items-start gap-4 p-6 sm:flex-row sm:items-center">
-              <div className="flex size-16 shrink-0 items-center justify-center rounded-full bg-primary/10 text-3xl">
+          <Card className="glass-card overflow-hidden animated-border">
+            <CardContent className="flex flex-col items-start gap-4 p-6 sm:flex-row sm:items-center relative z-10 bg-card/40 backdrop-blur-3xl m-[1px] rounded-xl">
+              <div className="flex size-16 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary/20 to-accent/20 text-3xl shadow-inner">
                 <span aria-hidden>👩‍🏫</span>
               </div>
               <div>
-                <div className="text-xl font-semibold">Dr. Maha Hamed</div>
-                <div className="text-sm text-muted-foreground">
+                <div className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">Dr. Maha Hamed</div>
+                <div className="text-sm font-medium text-primary/80 dark:text-primary/60">
                   Course Instructor · Faculty of AI &amp; Informatics · Horus University Egypt
                 </div>
-                <p className="mt-2 max-w-2xl text-sm">
-                  Academic supervisor for the Modern Regression course. The system&rsquo;s statistical
-                  outputs map 1-to-1 to the syllabus: Least Squares Estimation, coefficient
-                  inference, ANOVA decomposition, t-tests at α = 0.05, and 95% confidence intervals.
+                <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+                  Visionary academic supervisor bridging the gap between theoretical statistics and modern software engineering. This platform was architected under her guidance to translate complex syllabus concepts—Least Squares Estimation, ANOVA decomposition, and rigorous coefficient inference—into a production-grade, interactive analytics experience.
                 </p>
               </div>
             </CardContent>
@@ -186,7 +192,7 @@ export default function AboutPage() {
             {TEAM.map((m) => (
               <Card
                 key={m.num}
-                className="group relative overflow-hidden transition-shadow hover:shadow-md"
+                className="group relative overflow-hidden glass-card transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary/10"
               >
                 <div className="relative aspect-[4/5] w-full overflow-hidden bg-muted">
                   {m.photo ? (
@@ -195,38 +201,41 @@ export default function AboutPage() {
                       alt={m.name}
                       fill
                       sizes="(max-width: 640px) 100vw, (max-width: 1280px) 33vw, 20vw"
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      className="object-cover transition-transform duration-700 group-hover:scale-110"
                     />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center text-5xl text-muted-foreground/40">
+                    <div className="flex h-full w-full items-center justify-center text-5xl bg-gradient-to-br from-muted to-muted/50 text-muted-foreground/40">
                       <span aria-hidden>👤</span>
                     </div>
                   )}
-                  <div className="absolute left-2 top-2">
-                    <Badge variant="secondary" className="font-mono">
+                  {/* Subtle overlay gradient on hover */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                  
+                  <div className="absolute left-2 top-2 z-10 transition-transform duration-300 group-hover:-translate-y-1">
+                    <Badge variant="secondary" className="font-mono backdrop-blur-md bg-secondary/80">
                       {m.num}
                     </Badge>
                   </div>
                   {m.leader ? (
-                    <div className="absolute right-2 top-2">
-                      <Badge variant="accent">Team Lead</Badge>
+                    <div className="absolute right-2 top-2 z-10 transition-transform duration-300 group-hover:-translate-y-1">
+                      <Badge variant="accent" className="shadow-lg shadow-accent/30 animate-pulse">Team Lead</Badge>
                     </div>
                   ) : null}
                 </div>
-                <CardContent className="space-y-1 p-4">
-                  <div className="text-xs font-medium uppercase tracking-wider text-primary">
+                <CardContent className="space-y-1 p-4 relative z-10 bg-card/80 backdrop-blur-sm border-t border-white/5">
+                  <div className="text-[10px] font-bold uppercase tracking-widest text-primary/80 dark:text-primary/70">
                     {m.role}
                   </div>
-                  <div className="text-sm font-semibold leading-tight">{m.name}</div>
-                  <div className="text-xs text-muted-foreground">{m.track}</div>
+                  <div className="text-sm font-semibold leading-tight group-hover:text-primary transition-colors">{m.name}</div>
+                  <div className="text-[11px] text-muted-foreground font-medium">{m.track}</div>
                   {m.portfolio ? (
                     <a
                       href={m.portfolio}
                       target="_blank"
                       rel="noreferrer"
-                      className="mt-1 inline-block text-xs font-medium text-primary underline-offset-4 hover:underline"
+                      className="mt-2 inline-block text-[11px] font-bold text-accent transition-colors hover:text-primary"
                     >
-                      {m.portfolio.replace(/^https?:\/\//, "")}
+                      {m.portfolio.replace(/^https?:\/\//, "")} <span aria-hidden>↗</span>
                     </a>
                   ) : null}
                 </CardContent>

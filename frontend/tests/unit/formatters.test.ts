@@ -58,9 +58,11 @@ describe("formatPValue", () => {
 });
 
 describe("r2Band", () => {
-  it("classifies into weak / moderate / excellent", () => {
-    expect(r2Band(0.2)).toBe("weak");
-    expect(r2Band(0.6)).toBe("moderate");
-    expect(r2Band(0.95)).toBe("excellent");
+  it("classifies into no_relation / poor / good / nearly_perfect / perfect", () => {
+    expect(r2Band(0.2)).toBe("no_relation");
+    expect(r2Band(0.3)).toBe("poor");
+    expect(r2Band(0.6)).toBe("good");
+    expect(r2Band(0.8)).toBe("nearly_perfect");
+    expect(r2Band(1.0)).toBe("perfect");
   });
 });

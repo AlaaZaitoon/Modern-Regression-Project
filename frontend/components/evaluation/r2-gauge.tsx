@@ -15,26 +15,37 @@ import { r2Band } from "@/lib/formatters";
 interface Props {
   r2: number;
   adjR2: number;
+  modelType: "simple" | "multiple";
 }
 
 const BANDS: Record<
-  "weak" | "moderate" | "excellent",
+  "no_relation" | "poor" | "good" | "nearly_perfect" | "perfect",
   { label: string; color: string; ring: string }
 > = {
-  weak: {
-    label: "Weak fit",
+  no_relation: {
+    label: "No relation",
     color: "text-destructive",
     ring: "hsl(0 84% 60%)",
   },
-  moderate: {
-    label: "Moderate fit",
+  poor: {
+    label: "Poor fit",
     color: "text-warning",
     ring: "hsl(36 94% 50%)",
   },
-  excellent: {
-    label: "Excellent fit",
+  good: {
+    label: "Good fit",
+    color: "text-primary",
+    ring: "hsl(217 91% 60%)",
+  },
+  nearly_perfect: {
+    label: "Nearly perfect",
     color: "text-success",
     ring: "hsl(142 71% 45%)",
+  },
+  perfect: {
+    label: "Perfect fit",
+    color: "text-success",
+    ring: "hsl(187 92% 41%)",
   },
 };
 
@@ -50,49 +61,50 @@ const VISIBLE_ARC = CIRCUMFERENCE * ARC_FRACTION;
  * and the numeric readout in tandem. Skips animation for users with
  * reduced-motion preferences.
  */
-export function R2Gauge({ r2, adjR2 }: Props) {
-  const reduceMotion = useReducedMotion();
-  const clamped = Math.max(0, Math.min(1, r2));
-  const band = r2Band(clamped);
+export function R2Gauge({ r2, adjR2, modelType }: Props) {
+  const shouldReduceMotion = useReducedMotion();
+  const visualValue = Math.max(0, Math.min(1, r2));
+  const band = r2Band(visualValue);
   const { label, color, ring } = BANDS[band];
 
-  // Animated motion value drives both stroke and displayed percent.
-  const progress = useMotionValue(reduceMotion ? clamped : 0);
-  const dashOffset = useTransform(progress, (v) => VISIBLE_ARC * (1 - v));
+  // Motion value for the numeric percentage
+  const pctValue = useMotionValue(shouldReduceMotion ? visualValue * 100 : 0);
   const [displayPct, setDisplayPct] = React.useState(
-    () => (reduceMotion ? clamped * 100 : 0),
+    () => (shouldReduceMotion ? visualValue * 100 : 0),
   );
 
+  // When value updates, animate it
   React.useEffect(() => {
-    if (reduceMotion) {
-      progress.set(clamped);
-      setDisplayPct(clamped * 100);
+    if (shouldReduceMotion) {
+      pctValue.set(visualValue * 100);
+      setDisplayPct(visualValue * 100);
       return;
     }
-    const controls = animate(progress, clamped, {
-      duration: 1.1,
-      ease: [0.22, 1, 0.36, 1],
+
+    const controls = animate(pctValue, visualValue * 100, {
+      duration: 1.2,
+      ease: [0.32, 0.72, 0, 1], // easeOutQuint
+      onUpdate: (v) => setDisplayPct(v),
     });
-    const unsubscribe = progress.on("change", (v) => setDisplayPct(v * 100));
-    return () => {
-      controls.stop();
-      unsubscribe();
-    };
-  }, [clamped, progress, reduceMotion]);
+    return () => controls.stop();
+  }, [visualValue, pctValue, shouldReduceMotion]);
+
+  // Stroke offset from 100% (empty) down to 0% (full) of VISIBLE_ARC
+  const dashOffset = useTransform(pctValue, [0, 100], [VISIBLE_ARC, 0]);
 
   const size = RADIUS * 2 + STROKE * 2;
   const center = size / 2;
 
+  const isSimple = modelType === "simple";
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>R² gauge</CardTitle>
-        <CardDescription>
-          Proportion of variance in the target explained by the model.
-        </CardDescription>
+    <Card className="flex flex-col">
+      <CardHeader className="text-center pb-2">
+        <CardTitle>Fit Quality</CardTitle>
+        <CardDescription>Variance explained by the model</CardDescription>
       </CardHeader>
-      <CardContent className="flex flex-col items-center gap-4">
-        <div className="relative" aria-hidden>
+      <CardContent className="flex flex-1 flex-col items-center justify-center gap-6">
+        <div className="relative flex items-center justify-center pt-4" aria-hidden>
           <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
             {/* Rotate so the arc opens at the bottom. */}
             <g transform={`rotate(135 ${center} ${center})`}>
@@ -133,18 +145,20 @@ export function R2Gauge({ r2, adjR2 }: Props) {
         <div
           role="group"
           aria-label="R-squared details"
-          className="grid w-full max-w-sm grid-cols-2 gap-3 text-center text-sm"
+          className={`grid w-full max-w-sm gap-3 text-center text-sm ${isSimple ? 'grid-cols-1' : 'grid-cols-2'}`}
         >
           <div className="rounded-md border bg-muted/30 p-3">
             <div className="text-xs uppercase tracking-wider text-muted-foreground">R²</div>
             <div className="text-lg font-semibold tabular-nums">{(r2 * 100).toFixed(2)}%</div>
           </div>
-          <div className="rounded-md border bg-muted/30 p-3">
-            <div className="text-xs uppercase tracking-wider text-muted-foreground">
-              Adjusted R²
+          {!isSimple && (
+            <div className="rounded-md border bg-muted/30 p-3">
+              <div className="text-xs uppercase tracking-wider text-muted-foreground">
+                Adjusted R²
+              </div>
+              <div className="text-lg font-semibold tabular-nums">{(adjR2 * 100).toFixed(2)}%</div>
             </div>
-            <div className="text-lg font-semibold tabular-nums">{(adjR2 * 100).toFixed(2)}%</div>
-          </div>
+          )}
         </div>
       </CardContent>
     </Card>

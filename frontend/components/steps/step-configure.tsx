@@ -35,7 +35,7 @@ export function StepConfigure() {
     <section className="space-y-6 animate-fade-in">
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="text-2xl font-semibold tracking-tight">Configure your model</h2>
+          <h2 className="text-2xl font-semibold tracking-tight text-gradient">Configure your model</h2>
           <p className="text-sm text-muted-foreground">
             Working with <span className="font-medium text-foreground">{dataset.filename}</span> ·{" "}
             {dataset.numeric_columns.length} numeric columns available.

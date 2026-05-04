@@ -25,6 +25,14 @@ import { FeatureImportanceBar } from "@/components/charts/feature-importance-bar
 import { ResidualsBar } from "@/components/charts/residuals-bar";
 import { ScatterRegression } from "@/components/charts/scatter-regression";
 import { RecommendationsPanel } from "@/components/recommendations/recommendations-panel";
+import {
+  ModelFormulas,
+  R2Formula,
+  SumOfSquaresFormulas,
+  InferenceFormulas,
+  CiFormula,
+} from "@/components/evaluation/lse-formulas";
+import { DataTable } from "@/components/evaluation/data-table";
 import { api } from "@/lib/api";
 import { useWorkflowStore } from "@/store/workflow-store";
 
@@ -49,61 +57,55 @@ export function ReportClient() {
   const model = storeModel ?? fallback.data ?? null;
 
   if (!model) {
-    // Still loading the URL-driven fallback.
+    // 1. Still loading the URL-driven fallback.
     if (fallbackId && fallback.isLoading) {
       return (
-        <main className="container space-y-4 py-12">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Loader2 className="size-4 animate-spin" aria-hidden />
-            Loading model <span className="font-mono">{fallbackId}</span>…
+        <main className="container space-y-4 py-12 animate-pulse">
+          <div className="flex items-center gap-3 text-sm text-muted-foreground">
+            <Loader2 className="size-5 animate-spin text-primary" aria-hidden />
+            Loading model <span className="font-mono text-foreground">{fallbackId}</span>…
           </div>
-          <Skeleton className="h-40 w-full" />
-          <Skeleton className="h-64 w-full" />
+          <Skeleton className="h-[200px] w-full rounded-xl" />
+          <Skeleton className="h-[400px] w-full rounded-xl" />
         </main>
       );
     }
 
-    // Backend couldn't find the model (likely restarted since training).
+    // 2. Backend couldn't find the model (restarted or invalid ID).
     if (fallbackId && fallback.isError) {
-      const err = fallback.error;
-      const detail =
-        err instanceof ApiError && err.code === "model_not_found"
-          ? "The backend no longer has this model — most likely it was restarted. Re-train to generate a fresh report."
-          : err instanceof Error
-            ? err.message
-            : "Unable to load the model from the backend.";
       return (
-        <main className="container py-12">
-          <Alert variant="warning">
-            <AlertTriangle className="size-4" aria-hidden />
-            <AlertTitle>Couldn&rsquo;t load model.</AlertTitle>
-            <AlertDescription>{detail}</AlertDescription>
-          </Alert>
-          <Button asChild variant="outline" className="mt-4">
+        <main className="container max-w-2xl py-20 flex flex-col items-center justify-center text-center animate-fade-in">
+          <div className="flex size-20 items-center justify-center rounded-full bg-red-500/10 text-red-500 mb-6">
+            <AlertTriangle className="size-10" aria-hidden />
+          </div>
+          <h2 className="text-3xl font-bold tracking-tight mb-3">Model Not Found</h2>
+          <p className="text-muted-foreground text-lg mb-8 max-w-md">
+            The backend no longer has this model in memory. This usually happens when the server restarts. Please re-train your model to generate a fresh report.
+          </p>
+          <Button asChild size="lg" className="rounded-full shadow-lg shadow-primary/20">
             <Link href="/">
-              <ArrowLeft />
-              Back to dashboard
+              <ArrowLeft className="mr-2 size-4" />
+              Back to Dashboard
             </Link>
           </Button>
         </main>
       );
     }
 
-    // No id at all — user opened /report cold.
+    // 3. No id at all — user opened /report cold.
     return (
-      <main className="container py-12">
-        <Alert variant="info">
-          <AlertTitle>No model loaded.</AlertTitle>
-          <AlertDescription>
-            Open the dashboard, upload a dataset, and train a model first. Reports are linked
-            from Step 5 with the trained <span className="font-mono">model_id</span> in the URL,
-            so opening this route directly doesn&rsquo;t know which model to render.
-          </AlertDescription>
-        </Alert>
-        <Button asChild variant="outline" className="mt-4">
+      <main className="container max-w-2xl py-20 flex flex-col items-center justify-center text-center animate-fade-in">
+        <div className="flex size-20 items-center justify-center rounded-full bg-primary/10 text-primary mb-6">
+          <Loader2 className="size-10" aria-hidden />
+        </div>
+        <h2 className="text-3xl font-bold tracking-tight mb-3">No Model Loaded</h2>
+        <p className="text-muted-foreground text-lg mb-8 max-w-md">
+          Reports are linked from the dashboard after training. Opening this route directly doesn't know which model to render.
+        </p>
+        <Button asChild size="lg" className="rounded-full shadow-lg shadow-primary/20">
           <Link href="/">
-            <ArrowLeft />
-            Back to dashboard
+            <ArrowLeft className="mr-2 size-4" />
+            Go to Dashboard
           </Link>
         </Button>
       </main>
@@ -210,33 +212,55 @@ function ReportBody({ model, pdfUrl, isSimple, modelVars }: ReportBodyProps) {
         </div>
       </header>
 
-      {/* ── Equation ── */}
+      {/* ── 1. MODEL THEORY → EQUATION → DATA TABLE ── */}
+      <section className="report-section">
+        <ModelFormulas modelType={model.model_type === "simple" ? "simple" : "multiple"} />
+      </section>
       <section className="report-section">
         <EquationDisplay model={model} />
       </section>
-
-      {/* ── Metrics ── */}
       <section className="report-section">
-        <MetricsGrid metrics={model.metrics} />
+        <DataTable
+          predictions={model.predictions}
+          coefficients={model.coefficients}
+          xCols={model.x_cols}
+          yCol={model.y_col}
+          sampleMeans={model.sample_means}
+        />
       </section>
 
-      {/* ── R² gauge + Recommendations ── */}
+      {/* ── 2. R² THEORY → METRICS → R² GAUGE ── */}
+      <section className="report-section">
+        <R2Formula modelType={model.model_type === "simple" ? "simple" : "multiple"} />
+      </section>
+      <section className="report-section">
+        <MetricsGrid metrics={model.metrics} modelType={model.model_type === "simple" ? "simple" : "multiple"} />
+      </section>
       <section className="report-section grid gap-4 lg:grid-cols-2">
-        <R2Gauge r2={model.metrics.r2} adjR2={model.metrics.adj_r2} />
+        <R2Gauge r2={model.metrics.r2} adjR2={model.metrics.adj_r2} modelType={model.model_type === "simple" ? "simple" : "multiple"} />
         <RecommendationsPanel model={model} dataset={dataset} />
       </section>
 
-      {/* ── ANOVA ── */}
+      {/* ── 3. SST/SSR/SSE THEORY → ANOVA ── */}
+      <section className="report-section">
+        <SumOfSquaresFormulas />
+      </section>
       <section className="report-section">
         <AnovaTable anova={model.anova} />
       </section>
 
-      {/* ── T-tests ── */}
+      {/* ── 4. INFERENCE THEORY → T-TESTS ── */}
+      <section className="report-section">
+        <InferenceFormulas modelType={model.model_type === "simple" ? "simple" : "multiple"} />
+      </section>
       <section className="report-section">
         <TTestTable rows={model.t_tests} />
       </section>
 
-      {/* ── Confidence intervals ── */}
+      {/* ── 5. CI THEORY → CI TABLE ── */}
+      <section className="report-section">
+        <CiFormula />
+      </section>
       <section className="report-section">
         <CiTable intervals={model.confidence_intervals} />
       </section>

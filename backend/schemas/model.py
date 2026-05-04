@@ -116,6 +116,7 @@ class TrainResponse(BaseModel):
     correlation_matrix: CorrelationMatrix
     cooks_distance: list[CookDistance]
     predictions: list[PredictionRow]
+    sample_means: dict[str, float]  # {"x_col": x̄, "y_col": ȳ}
     created_at: datetime
 
 

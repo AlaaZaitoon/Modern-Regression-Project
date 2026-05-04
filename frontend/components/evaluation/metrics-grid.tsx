@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 
 interface Props {
   metrics: Metrics;
+  modelType: "simple" | "multiple";
 }
 
 interface MetricSpec {
@@ -43,28 +44,40 @@ const SPECS: MetricSpec[] = [
   { key: "se", label: "Std. error", help: "Std. error of estimate", icon: Gauge, format: (v) => formatNumber(v, 4) },
 ];
 
-export function MetricsGrid({ metrics }: Props) {
+export function MetricsGrid({ metrics, modelType }: Props) {
+  const visibleSpecs = SPECS.filter(spec => 
+    modelType === "simple" ? spec.key !== "adj_r2" : true
+  );
+
   return (
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-      {SPECS.map((spec) => {
+      {visibleSpecs.map((spec) => {
         const Icon = spec.icon;
         return (
           <Card
             key={spec.key}
             className={cn(
-              "transition-shadow hover:shadow-sm",
-              spec.accent && "border-primary/30 bg-primary/[0.03]",
+              "overflow-hidden glass-card",
+              spec.accent && "ring-1 ring-primary/20 shadow-md glow-primary",
             )}
           >
-            <CardContent className="space-y-1 p-4">
-              <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <span className="uppercase tracking-wider">{spec.label}</span>
-                <Icon className="size-4" aria-hidden />
+            <CardContent className="flex items-center gap-4 p-4">
+              <div
+                className={cn(
+                  "flex size-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary/10 to-accent/10 dark:from-primary/20 dark:to-accent/20",
+                  spec.accent ? "text-primary font-bold" : "text-muted-foreground",
+                )}
+              >
+                <Icon className={cn("size-5", spec.accent && "animate-pulse")} aria-hidden />
               </div>
-              <div className="text-2xl font-semibold tabular-nums tracking-tight">
-                {spec.format(metrics[spec.key])}
+              <div className="space-y-0.5">
+                <div className="text-2xl font-semibold tabular-nums tracking-tight">
+                  {spec.format(metrics[spec.key])}
+                </div>
+                <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+                  {spec.label}
+                </div>
               </div>
-              <div className="text-xs text-muted-foreground">{spec.help}</div>
             </CardContent>
           </Card>
         );

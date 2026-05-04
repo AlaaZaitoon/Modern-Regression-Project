@@ -557,16 +557,22 @@ function generateRecs(r2, xCols, coefs, extraInfo) {
   // yCol is passed via extraInfo so coefficient text can name the outcome variable
   const yLabel = (extraInfo && extraInfo.yCol) ? extraInfo.yCol : 'Y';
 
-  // 1. R² Interpretation
-  if (r2 >= 0.85)
-    recs.push({type:'success', title:'Excellent Model Fit',
-      text:`R² = ${r2Str} — The model explains ${r2Pct}% of the variance in "${yLabel}". This indicates a strong linear relationship between the selected predictors and the outcome.`});
-  else if (r2 >= 0.60)
-    recs.push({type:'warning', title:'Moderate Model Fit',
-      text:`R² = ${r2Str} — The model explains ${r2Pct}% of the variance in "${yLabel}". The remaining ${100 - r2Pct}% is unexplained. Consider adding more predictive features or investigating non-linear relationships.`});
+  // 1. R² Interpretation (5-tier classification)
+  if (r2 >= 1.0)
+    recs.push({type:'success', title:'Perfect Fit',
+      text:`R² = ${r2Str} — The model explains 100% of the variance in "${yLabel}". All data points lie exactly on the regression line. This is a perfect linear relationship.`});
+  else if (r2 >= 0.90)
+    recs.push({type:'success', title:'Nearly Perfect Fit',
+      text:`R² = ${r2Str} — The model explains ${r2Pct}% of the variance in "${yLabel}". This indicates a very strong linear relationship between the selected predictors and the outcome.`});
+  else if (r2 >= 0.70)
+    recs.push({type:'info', title:'Good Model Fit',
+      text:`R² = ${r2Str} — The model explains ${r2Pct}% of the variance in "${yLabel}". The remaining ${100 - r2Pct}% is unexplained. The model captures the main trend well but there is room for improvement.`});
+  else if (r2 >= 0.40)
+    recs.push({type:'warning', title:'Poor Model Fit',
+      text:`R² = ${r2Str} — The model explains only ${r2Pct}% of the variance in "${yLabel}". The linear model captures some pattern but leaves substantial variance unexplained. Consider adding more predictors or investigating non-linear relationships.`});
   else
-    recs.push({type:'danger', title:'Weak Model Fit',
-      text:`R² = ${r2Str} — Only ${r2Pct}% of the variance in "${yLabel}" is explained. The linear model may not capture the underlying pattern. Consider transforming variables, adding interaction terms, or exploring a non-linear model.`});
+    recs.push({type:'danger', title:'No Linear Relation',
+      text:`R² = ${r2Str} — Only ${r2Pct}% of the variance in "${yLabel}" is explained. There appears to be no meaningful linear relationship. Consider transforming variables, adding interaction terms, or exploring a non-linear model.`});
 
   // 2. Coefficient Interpretation — direction and effect size per predictor
   const sorted = [...coefs].sort((a, b) => Math.abs(b.val) - Math.abs(a.val));
@@ -590,15 +596,18 @@ function generateRecs(r2, xCols, coefs, extraInfo) {
   }
 
   // 4. Model Suitability Assessment
-  if (r2 >= 0.75) {
-    recs.push({type:'success', title:'Model Suitable for Prediction',
-      text:`R² = ${r2Str} — The model explains most of the variance and can be used for predictions within the observed data range. Avoid extrapolating beyond the range of the training data.`});
+  if (r2 >= 0.90) {
+    recs.push({type:'success', title:'Model Highly Suitable for Prediction',
+      text:`R² = ${r2Str} — The model explains nearly all of the variance and is highly suitable for predictions within the observed data range. Avoid extrapolating beyond the range of the training data.`});
+  } else if (r2 >= 0.70) {
+    recs.push({type:'info', title:'Model Suitable for Prediction',
+      text:`R² = ${r2Str} — The model explains most of the variance and can be used for predictions, though some unexplained variation remains. Consider whether the accuracy is acceptable for your use case.`});
   } else if (r2 >= 0.40) {
     recs.push({type:'warning', title:'Model Needs Improvement',
       text:'The model captures some patterns but leaves substantial variance unexplained. Suggested actions: (1) add more relevant predictors, (2) check for and remove outliers, (3) investigate non-linear relationships, (4) increase the sample size.'});
   } else {
     recs.push({type:'danger', title:'Model Inadequate for Prediction',
-      text:'The linear model fits the data poorly. Possible causes: (1) the true relationship is non-linear, (2) key predictors are missing, or (3) the data contains significant noise or outliers. Consider polynomial regression or additional feature engineering.'});
+      text:'The linear model fits the data poorly — there is essentially no linear relationship. Possible causes: (1) the true relationship is non-linear, (2) key predictors are missing, or (3) the data contains significant noise or outliers. Consider polynomial regression or additional feature engineering.'});
   }
 
   // 5. Sample Size Analysis
@@ -614,7 +623,7 @@ function generateRecs(r2, xCols, coefs, extraInfo) {
 
   // 6. Targeted Improvement Suggestions
   const suggestions = [];
-  if (r2 < 0.85) suggestions.push('include additional predictors that may explain more variance');
+  if (r2 < 0.90) suggestions.push('include additional predictors that may explain more variance');
   if (n > 0 && n < 50) suggestions.push(`collect more observations (current: ${n}; recommended: 50+)`);
   if (sorted.some(c => Math.abs(c.val) < 0.001)) suggestions.push('consider removing near-zero-coefficient predictors — they contribute negligible predictive value');
   if (suggestions.length > 0) {
@@ -788,8 +797,8 @@ function renderCharts(json) {
 function renderEvaluation(json) {
   const {r2, mse, rmse, se, equation, coefficients, intercept, anova, ttest, confidenceIntervals} = json;
   const r2Pct   = Math.min(Math.round(r2*100),100);
-  const r2Color = r2>=0.85 ? '#10b981' : r2>=0.60 ? '#f59e0b' : '#ef4444';
-  const r2Label = r2>=0.85 ? 'Excellent Fit ✅' : r2>=0.60 ? 'Moderate Fit ⚠️' : 'Weak Fit ❌';
+  const r2Color = r2 >= 1.0 ? '#06b6d4' : r2 >= 0.90 ? '#10b981' : r2 >= 0.70 ? '#3b82f6' : r2 >= 0.40 ? '#f59e0b' : '#ef4444';
+  const r2Label = r2 >= 1.0 ? 'Perfect Fit 🎯' : r2 >= 0.90 ? 'Nearly Perfect ✅' : r2 >= 0.70 ? 'Good Fit 👍' : r2 >= 0.40 ? 'Poor Fit ⚠️' : 'No Relation ❌';
 
   // R² block
   const block = document.getElementById('r2Block');

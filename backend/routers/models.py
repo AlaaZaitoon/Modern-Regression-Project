@@ -43,6 +43,7 @@ def _train_response_from_entry(entry: dict, model_id: str) -> TrainResponse:
         correlation_matrix=entry["correlation_matrix"],
         cooks_distance=entry["cooks_distance"],
         predictions=entry["predictions"],
+        sample_means=entry["sample_means"],
         created_at=created_at,  # type: ignore[arg-type]
     )
 
@@ -73,7 +74,9 @@ def train_model(req: TrainRequest) -> TrainResponse:
 
     entry = model_registry.get(model_id)
     assert entry is not None
-    return _train_response_from_entry(entry, model_id)
+    response_obj = _train_response_from_entry(entry, model_id)
+    print("DEBUG TrainResponse dict:", response_obj.model_dump().keys())
+    return response_obj
 
 
 @router.get(

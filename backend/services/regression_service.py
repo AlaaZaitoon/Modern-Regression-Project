@@ -87,6 +87,12 @@ def train_ols(
     predictions = _build_predictions(sub, x_cols, y, y_pred)
     equation_str = _format_equation(y_col, intercept, slopes, x_cols)
 
+    # Sample means (x̄, ȳ) — used by the frontend formula reference.
+    sample_means: dict[str, float] = {
+        col: safe_float(float(sub[col].mean()), 0.0) for col in x_cols
+    }
+    sample_means[y_col] = safe_float(float(y.mean()), 0.0)
+
     return {
         "model": model,  # statsmodels results, retained for /predict
         "x_cols": list(x_cols),
@@ -103,6 +109,7 @@ def train_ols(
         "correlation_matrix": correlation_matrix,
         "cooks_distance": cooks,
         "predictions": predictions,
+        "sample_means": sample_means,
     }
 
 

@@ -48,6 +48,7 @@ function makeTrain(modelId = "m-1", datasetId = "ds-1"): TrainResponse {
     correlation_matrix: { columns: ["x", "y"], matrix: [[1, 0.9], [0.9, 1]] },
     cooks_distance: [],
     predictions: [],
+    sample_means: { x: 0, y: 0 },
     created_at: new Date().toISOString(),
   };
 }

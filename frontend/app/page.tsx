@@ -23,44 +23,51 @@ function swaggerUrl(): string {
 
 export default function Home() {
   return (
-    <div className="relative flex min-h-screen flex-col">
-      {/* Decorative backdrop */}
-      <div className="bg-grid-slate pointer-events-none absolute inset-0 -z-10 opacity-30" />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[280px] bg-gradient-to-b from-primary/10 via-transparent to-transparent"
-      />
+    <div className="relative flex min-h-screen flex-col overflow-hidden">
+      {/* Clean, high-performance background */}
+      <div className="pointer-events-none absolute inset-0 -z-20 bg-background" />
+      <div className="bg-grid-slate pointer-events-none absolute inset-0 -z-10 opacity-60" />
+      
+      {/* Performant ambient glowing orbs without mix-blend-mode and smaller blur */}
+      <div aria-hidden className="pointer-events-none absolute -top-40 -left-40 -z-10 h-[500px] w-[500px] rounded-full bg-primary/10 blur-3xl dark:bg-primary/5" />
+      <div aria-hidden className="pointer-events-none absolute top-20 -right-40 -z-10 h-[400px] w-[400px] rounded-full bg-accent/10 blur-3xl dark:bg-accent/5" />
 
-      <header className="container sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background/80 backdrop-blur">
-        <Link href="/" className="flex items-center gap-3">
-          <Image
-            src="/hue-logo.png"
-            alt="Horus University Egypt"
-            width={36}
-            height={36}
-            className="rounded"
-            priority
-          />
-          <div className="leading-tight">
-            <div className="text-sm font-semibold tracking-tight">Smart Regression System</div>
-            <div className="text-xs text-muted-foreground">
-              Horus University Egypt · Modern Regression
+      <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-white/10 dark:border-white/5 glass">
+        <div className="container flex items-center justify-between">
+          <Link href="/" className="group flex items-center gap-3 transition-all hover:scale-[1.02]">
+            <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-lg shadow-primary/25 transition-transform group-hover:rotate-3">
+              <Image
+                src="/hue-logo.png"
+                alt="Horus University Egypt"
+                width={30}
+                height={30}
+                className="rounded"
+                priority
+              />
             </div>
-          </div>
-        </Link>
-        <div className="flex items-center gap-3">
-          <Link
-            href="/about"
-            className="hidden text-sm font-medium text-muted-foreground transition-colors hover:text-foreground sm:inline-block"
-          >
-            About
+            <div className="leading-tight">
+              <div className="text-sm font-bold tracking-tight text-foreground group-hover:text-gradient transition-colors duration-300">
+                Smart Regression System
+              </div>
+              <div className="text-[11px] font-medium text-muted-foreground">
+                Horus University Egypt · Analytics
+              </div>
+            </div>
           </Link>
-          <HealthIndicator />
-          <ThemeToggle />
+          <div className="flex items-center gap-4">
+            <Link
+              href="/about"
+              className="hidden text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground sm:inline-block"
+            >
+              About
+            </Link>
+            <HealthIndicator />
+            <ThemeToggle />
+          </div>
         </div>
       </header>
 
-      <main className="container flex flex-1 flex-col gap-8 py-8">
+      <main className="container relative flex flex-1 flex-col gap-8 py-10 z-10">
         <DashboardShell />
       </main>
 

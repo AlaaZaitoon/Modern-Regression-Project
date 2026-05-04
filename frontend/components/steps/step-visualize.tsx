@@ -67,7 +67,7 @@ export function StepVisualize() {
             <div className="flex size-9 items-center justify-center rounded-md bg-primary/10 text-primary">
               <BarChart3 className="size-5" aria-hidden />
             </div>
-            <h2 className="text-2xl font-semibold tracking-tight">Visualizations</h2>
+            <h2 className="text-2xl font-semibold tracking-tight text-gradient">Visualizations</h2>
           </div>
           <p className="mt-1 text-sm text-muted-foreground">
             {isSimple ? "Simple" : "Multiple"} regression · {x_cols.length} predictor
