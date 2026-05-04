@@ -48,9 +48,32 @@ npx playwright install chromium
 
 ---
 
-## 3. Daily run — two terminals
+## 3. Daily run
 
-### Terminal 1 · Backend (`:8000`)
+### Option A — One-click launcher (recommended)
+
+Double-click **`start.bat`** at the repo root (or run it from PowerShell).
+It will:
+
+1. Activate the backend venv and install any new dependencies
+2. Start the **FastAPI backend** on `:8000` in a new terminal window
+3. Install any new frontend packages with `npm install`
+4. Start the **Next.js frontend** on `:3000` in a new terminal window
+5. **Open your browser** at `http://localhost:3000` automatically
+
+```powershell
+cd "c:\Users\Alaa Zaitoon\Desktop\Modern Regression Project"
+.\start.bat        # Windows
+./start.sh         # macOS / Linux
+```
+
+> Close the terminal windows to stop the servers.
+
+### Option B — Manual (two terminals)
+
+If you prefer running each service separately:
+
+#### Terminal 1 · Backend (`:8000`)
 
 ```powershell
 cd "c:\Users\Alaa Zaitoon\Desktop\Modern Regression Project\backend"
@@ -63,7 +86,7 @@ Smoke-test:
 - Health: <http://localhost:8000/api/v1/health>
 - Swagger UI: <http://localhost:8000/docs>
 
-### Terminal 2 · Frontend (`:3000`)
+#### Terminal 2 · Frontend (`:3000`)
 
 ```powershell
 cd "c:\Users\Alaa Zaitoon\Desktop\Modern Regression Project\frontend"
@@ -74,16 +97,6 @@ Open: <http://localhost:3000>
 
 > The frontend polls `/api/v1/health` and shows a **Backend offline**
 > badge in the header if `:8000` isn't reachable.
-
-### Or use the bundled launcher
-
-If `start.bat` exists at the repo root, double-click it (or run from
-PowerShell). It opens both servers in separate windows.
-
-```powershell
-cd "c:\Users\Alaa Zaitoon\Desktop\Modern Regression Project"
-.\start.bat
-```
 
 ---
 

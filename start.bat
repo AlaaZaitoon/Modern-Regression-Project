@@ -1,8 +1,20 @@
 @echo off
-REM Smart Regression System :: backend launcher (Windows)
+REM ================================================================
+REM  Smart Regression System :: Full-Stack Launcher (Windows)
+REM  Starts both Backend (FastAPI) and Frontend (Next.js) together.
+REM  Press Ctrl+C in either window to stop that service.
+REM ================================================================
 setlocal
 
-pushd "%~dp0backend"
+set "ROOT=%~dp0"
+
+REM ── Backend Setup & Launch ─────────────────────────────────────
+echo.
+echo ========================================
+echo   Starting Backend (FastAPI)...
+echo ========================================
+
+pushd "%ROOT%backend"
 
 if not exist venv (
   echo [start.bat] Creating virtual environment...
@@ -19,7 +31,7 @@ if not exist venv (
 
 call venv\Scripts\activate.bat || goto :error
 
-echo [start.bat] Installing dependencies...
+echo [start.bat] Installing backend dependencies...
 pip install --quiet -r requirements.txt || goto :error
 
 if not exist .env (
@@ -27,8 +39,48 @@ if not exist .env (
   copy /Y .env.example .env >NUL
 )
 
-echo [start.bat] Starting FastAPI on http://localhost:8000
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
+REM Launch backend in a NEW window (so this script continues)
+echo [start.bat] Backend starting on http://localhost:8000
+start "Backend - FastAPI" cmd /k "cd /d "%ROOT%backend" && venv\Scripts\activate.bat && uvicorn main:app --reload --host 0.0.0.0 --port 8000"
+
+popd
+
+REM ── Frontend Setup & Launch ────────────────────────────────────
+echo.
+echo ========================================
+echo   Starting Frontend (Next.js)...
+echo ========================================
+
+pushd "%ROOT%frontend"
+
+if not exist node_modules (
+  echo [start.bat] Installing frontend dependencies...
+  npm install || goto :error
+)
+
+REM Launch frontend in a NEW window
+echo [start.bat] Frontend starting on http://localhost:3000
+start "Frontend - Next.js" cmd /k "cd /d "%ROOT%frontend" && npm run dev"
+
+popd
+
+REM ── Done ───────────────────────────────────────────────────────
+echo.
+echo ========================================
+echo   All services started!
+echo ========================================
+echo.
+echo   Backend:  http://localhost:8000
+echo   Frontend: http://localhost:3000
+echo   API Docs: http://localhost:8000/docs
+echo.
+echo   Close the terminal windows to stop.
+echo ========================================
+
+REM Open the frontend in the default browser after a short delay
+timeout /t 3 /nobreak >NUL
+start http://localhost:3000
+
 goto :eof
 
 :error

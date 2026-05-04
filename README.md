@@ -22,6 +22,17 @@
 
 ---
 
+## Live demo
+
+| | URL |
+|---|---|
+| 🌐 **Frontend** | [modern-regression-project.vercel.app](https://modern-regression-project.vercel.app) |
+| ⚙️ **API Docs** | [smart-regression-backend.onrender.com/docs](https://smart-regression-backend.onrender.com/docs) |
+
+> The backend runs on Render's free tier — the first request after ~15 min of
+> inactivity may take 30–60 s to wake up.
+
+
 ## Why this project
 
 Most "regression apps" you'll find online stop at `sklearn.LinearRegression()
@@ -127,15 +138,32 @@ ECharts · Framer Motion · Vitest · MSW · Playwright
 **Prerequisites:** Python **3.12** (avoid 3.13/3.14 — scientific wheels lag),
 Node.js **18+**, npm **9+**.
 
+### Option A — One-click launcher (recommended)
+
+Double-click **`start.bat`** (Windows) or run **`./start.sh`** (macOS/Linux)
+from the repo root. It will:
+
+1. Create a Python virtual environment (first run only)
+2. Install backend & frontend dependencies
+3. Start both servers in separate terminal windows
+4. Open `http://localhost:3000` in your browser automatically
+
 ```powershell
-# 1. Backend
+.\start.bat        # Windows — double-click or run from terminal
+./start.sh         # macOS / Linux
+```
+
+### Option B — Manual (two terminals)
+
+```powershell
+# Terminal 1 · Backend
 cd backend
 py -3.12 -m venv venv
 .\venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 python -m uvicorn main:app --reload --port 8000
 
-# 2. Frontend  (new terminal)
+# Terminal 2 · Frontend
 cd frontend
 npm install
 npm run dev
@@ -143,13 +171,6 @@ npm run dev
 
 Open <http://localhost:3000> — the header shows a **green dot** when the
 backend on `:8000` is reachable.
-
-Or just run the bundled launcher from the repo root:
-
-```powershell
-.\start.bat        # Windows
-./start.sh         # macOS / Linux
-```
 
 ---
 
