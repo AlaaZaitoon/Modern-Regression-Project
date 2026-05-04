@@ -66,7 +66,7 @@ export default function Home() {
 
       <footer className="container flex flex-wrap items-center justify-between gap-2 border-t py-4 text-xs text-muted-foreground">
         <span>
-          © 2025 Horus University Egypt · Faculty of AI &amp; Informatics · Supervisor:{" "}
+          © 2026 Horus University Egypt · Faculty of AI &amp; Informatics · Supervisor:{" "}
           <strong className="text-foreground">Dr. Maha Hamed</strong>
         </span>
         <div className="flex items-center gap-4">

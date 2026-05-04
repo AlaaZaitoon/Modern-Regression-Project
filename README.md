@@ -8,7 +8,7 @@
 > and a **Next.js 14** dashboard.
 
 <p align="center">
-  <img src="assets/hero.png" alt="Smart Regression dashboard" width="820" />
+  <img src="assets/4-results.png" alt="Smart Regression dashboard — Results step with R² gauge, ANOVA, t-tests, CIs" width="900" />
 </p>
 
 <p align="center">
@@ -224,12 +224,10 @@ npm run build         # asserts 250 kB First Load JS budget
 
 ## Screenshots
 
-> Drop your screenshots into `assets/` and they'll show up here.
-
 | | |
-|---|---|
-| ![Step 1 — Upload](assets/step1-upload.png) | ![Step 2 — Configure](assets/step2-configure.png) |
-| ![Step 3 — Visualize](assets/step3-visualize.png) | ![Step 4 — Results](assets/step4-results.png) |
+|:---:|:---:|
+| **Step 1 — Add data**<br/><img src="assets/1-upload.png" alt="Upload / manual entry / built-in samples" width="440" /> | **Step 2 — Configure**<br/><img src="assets/2-configure.png" alt="Pick target Y and predictors X" width="440" /> |
+| **Step 3 — Visualize**<br/><img src="assets/3-visualize.png" alt="Six interactive diagnostic charts" width="440" /> | **Step 4 — Results**<br/><img src="assets/4-results.png" alt="Equation, R² gauge, ANOVA, t-tests, 95% CIs, prediction" width="440" /> |
 
 ---
 
@@ -239,7 +237,7 @@ npm run build         # asserts 250 kB First Load JS budget
 - **Course:** Modern Regression
 - **Supervisor:** Dr. Maha Hamed
 - **Team Lead:** Alaa Saber Mohamed
-- **Year:** 2024 / 2025
+- **Year:** 2026
 
 The full team of 10 students is credited on the in-app
 [`/about`](frontend/app/about/page.tsx) page.
@@ -268,7 +266,7 @@ MIT — see [`LICENSE`](./LICENSE) (add one if you publish publicly).
 
 <p align="center">
   <sub>
-    © 2024–2025 Horus University — Egypt · Faculty of AI &amp; Informatics
+    © 2026 Horus University — Egypt · Faculty of AI &amp; Informatics
     · Supervisor: <strong>Dr. Maha Hamed</strong>
   </sub>
 </p>

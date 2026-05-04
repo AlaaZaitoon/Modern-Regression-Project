@@ -89,7 +89,7 @@ export default function AboutPage() {
             </Link>
           </Button>
           <Badge variant="accent" className="uppercase tracking-wider">
-            Academic Project · 2024 / 2025
+            Academic Project · 2026
           </Badge>
           <h1 className="text-balance max-w-3xl text-4xl font-semibold tracking-tight md:text-5xl">
             Smart Regression &amp;{" "}
@@ -140,7 +140,7 @@ export default function AboutPage() {
                 </div>
                 <CardTitle>Team</CardTitle>
                 <CardDescription>
-                  10 students from the AI &amp; Informatics faculty, academic year 2024 / 2025.
+                  10 students from the AI &amp; Informatics faculty, academic year 2026.
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -238,7 +238,7 @@ export default function AboutPage() {
 
       <footer className="container flex flex-wrap items-center justify-between gap-2 border-t py-4 text-xs text-muted-foreground">
         <span>
-          © 2025 Horus University — Egypt · Faculty of AI &amp; Informatics · Supervisor:{" "}
+          © 2026 Horus University — Egypt · Faculty of AI &amp; Informatics · Supervisor:{" "}
           <strong className="text-foreground">Dr. Maha Hamed</strong>
         </span>
         <Link
