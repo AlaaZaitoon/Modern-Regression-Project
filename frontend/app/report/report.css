@@ -1,0 +1,303 @@
+/*
+ * Print-optimized layout for the /report route.
+ *
+ * Screen: readable on-screen preview with generous whitespace.
+ * Print:  A4 paper, forced light theme, explicit color-adjust so Chrome
+ *         doesn't strip background tints from tables, cards, and gauges.
+ *
+ * IMPORTANT: All chart-specific print fixes are scoped under `.has-charts`
+ * so the tables-only report mode remains completely unaffected.
+ *
+ * KEY RULES:
+ *   - FIX 1: Always print white/light, regardless of OS dark mode
+ *   - FIX 2: Each diagnostic chart gets its OWN page (break-before: page)
+ *   - FIX 3: No forced grouping / space-filling — natural flow only
+ *   - FIX 4: Title never wraps — single line enforced
+ *   - FIX 5: Consistent 1.5cm A4 margins
+ */
+
+/* ======================================================================
+   SCREEN LAYOUT
+   ====================================================================== */
+
+.report-root {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+
+.report-section {
+  margin-top: 2.25rem;
+}
+
+.report-section > h2 {
+  break-after: avoid;
+  page-break-after: avoid;
+}
+
+/*
+ * Each chart in the Diagnostics section is wrapped in a
+ * `.diagnostic-chart-wrapper` div by report-client.tsx.
+ * On screen this just adds visual separation.
+ */
+.diagnostic-chart-wrapper {
+  margin-bottom: 1.5rem;
+}
+
+.diagnostic-chart-wrapper:last-child {
+  margin-bottom: 0;
+}
+
+
+/* ======================================================================
+   PRINT STYLESHEET
+   ====================================================================== */
+
+@media print {
+
+  /* ── FIX 5: A4 page with 1.5cm margins on all sides ── */
+  @page {
+    size: A4 portrait;
+    margin: 1.5cm 1.5cm 1.5cm 1.5cm;
+  }
+
+  /* ── FIX 1: Force white/light mode always ── */
+  :root {
+    color-scheme: light only !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-scheme: light !important;
+  }
+
+  html,
+  body,
+  .report-root {
+    background: #ffffff !important;
+    color: #111827 !important;
+  }
+
+  /*
+   * Force light-theme CSS custom property values so every Tailwind
+   * utility like `bg-primary`, `text-muted-foreground` etc. resolves
+   * to its light-theme color regardless of system preference.
+   */
+  :root,
+  .dark {
+    --background: 0 0% 100% !important;
+    --foreground: 225 40% 12% !important;
+    --card: 0 0% 100% !important;
+    --card-foreground: 225 40% 12% !important;
+    --popover: 0 0% 100% !important;
+    --popover-foreground: 225 40% 12% !important;
+    --primary: 225 57% 24% !important;
+    --primary-foreground: 0 0% 100% !important;
+    --secondary: 225 20% 96% !important;
+    --secondary-foreground: 225 40% 20% !important;
+    --muted: 225 15% 94% !important;
+    --muted-foreground: 225 10% 35% !important;
+    --accent: 41 64% 47% !important;
+    --accent-foreground: 0 0% 100% !important;
+    --destructive: 0 72% 45% !important;
+    --destructive-foreground: 0 0% 100% !important;
+    --success: 142 55% 32% !important;
+    --success-foreground: 0 0% 100% !important;
+    --warning: 38 92% 42% !important;
+    --warning-foreground: 225 40% 12% !important;
+    --border: 225 15% 80% !important;
+    --input: 225 15% 80% !important;
+    --ring: 225 57% 24% !important;
+  }
+
+  /* ── Hide UI chrome ── */
+  .no-print,
+  .no-print * {
+    display: none !important;
+  }
+
+  header[role="banner"],
+  nav[role="navigation"] {
+    display: none !important;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    display: none !important;
+  }
+
+  /* ── General print reset ── */
+  .report-root {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .report-root [class*="shadow"] {
+    box-shadow: none !important;
+  }
+
+  .report-root [class*="rounded-"] {
+    border-color: hsl(var(--border)) !important;
+  }
+
+  /* Avoid orphan headings. */
+  h1, h2, h3 {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  a {
+    color: hsl(var(--foreground)) !important;
+    text-decoration: none !important;
+  }
+
+  /* ── Sections: natural flow, break-inside: avoid on cards/tables ── */
+  .report-section {
+    margin-top: 0.75cm;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* ── FIX 4: Report header — title on one line ── */
+  .has-charts .report-header {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+
+  .has-charts .report-title {
+    white-space: nowrap !important;
+    font-size: 22px !important;
+  }
+
+  /* ====================================================================
+     CHARTS-SPECIFIC PRINT FIXES  (scoped to `.has-charts`)
+     Tables-only mode does NOT get `.has-charts`, so nothing here
+     affects it.
+     ==================================================================== */
+
+  /* Flatten all containers — no forced heights or min-heights */
+  .has-charts .report-section {
+    min-height: 0 !important;
+    height: auto !important;
+  }
+
+  .has-charts .report-section[class*="grid"],
+  .has-charts .report-section[class*="flex"] {
+    min-height: 0 !important;
+    height: auto !important;
+  }
+
+  /* Prevent breaks inside individual cards and tables */
+  .has-charts .bg-card,
+  .has-charts .rounded-xl,
+  .has-charts table {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* ── FIX 2: Each diagnostic chart gets its OWN page ──
+     The .diagnostics-section wrapper starts on a fresh page, keeping
+     the "Diagnostics" heading together with the first chart.
+     Every subsequent .diagnostic-chart-wrapper forces a new page. */
+
+  /* The header itself must NOT force a break */
+  .has-charts .diagnostics-section-header {
+    break-before: auto !important;
+    page-break-before: auto !important;
+  }
+
+  /* The outer wrapper starts the diagnostics on a new page */
+  .has-charts .diagnostics-section {
+    break-before: page;
+    page-break-before: always;
+    break-inside: avoid;
+  }
+
+  /* First chart stays with the header — no extra page break */
+  .has-charts .diagnostics-chart-grid > .diagnostic-chart-wrapper:first-child {
+    break-before: auto !important;
+    page-break-before: auto !important;
+  }
+
+  .has-charts .diagnostic-chart-wrapper {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 350px !important;
+    break-before: page !important;
+    page-break-before: always !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    overflow: visible !important;
+    position: relative !important;
+    margin-bottom: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* The chart grid must be block flow, not CSS grid */
+  .has-charts .diagnostics-chart-grid {
+    display: block !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    height: auto !important;
+  }
+
+  /* Cards inside chart wrappers: full width, natural height */
+  .has-charts .diagnostic-chart-wrapper > div {
+    width: 100% !important;
+    min-height: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
+    position: relative !important;
+  }
+
+  /* ECharts container: natural sizing, no fixed dimensions */
+  .has-charts .echarts-for-react {
+    position: relative !important;
+    display: block !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .has-charts .echarts-for-react > div {
+    position: relative !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* SVG / Canvas: fill container width */
+  .has-charts .echarts-for-react canvas,
+  .has-charts .diagnostic-chart-wrapper svg,
+  .has-charts .diagnostic-chart-wrapper canvas {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* ── Footer ── */
+  .has-charts .report-footer {
+    margin-top: 1cm !important;
+    padding-bottom: 0 !important;
+    padding-top: 0.4cm;
+    border-top: 1px solid hsl(var(--border));
+  }
+
+  /* ── Diagnostics heading: keep with first chart on same page ── */
+  .has-charts .diagnostics-section-header h2 {
+    margin-bottom: 0.3cm !important;
+    break-after: avoid !important;
+    page-break-after: avoid !important;
+  }
+}

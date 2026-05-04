@@ -1,0 +1,134 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Smart Regression System :: design tokens
+ *
+ * Light theme is the default. Dark theme kicks in on `html.dark` (managed by
+ * next-themes). All tokens are HSL triplets so Tailwind utility classes like
+ * `bg-primary/60` work out of the box.
+ *
+ * Brand:
+ *   navy  #1B2A5E  -> hsl(225, 57%, 24%)
+ *   gold  #C8972B  -> hsl(41, 64%, 47%)
+ */
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 225 40% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 225 40% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 225 40% 12%;
+
+    --primary: 225 57% 24%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 225 20% 96%;
+    --secondary-foreground: 225 40% 20%;
+
+    --muted: 225 15% 94%;
+    --muted-foreground: 225 10% 40%;
+
+    --accent: 41 64% 47%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 45%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 142 55% 38%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 92% 48%;
+    --warning-foreground: 225 40% 12%;
+
+    --border: 225 15% 88%;
+    --input: 225 15% 88%;
+    --ring: 225 57% 24%;
+
+    --brand-navy: 225 57% 24%;
+    --brand-gold: 41 64% 47%;
+
+    --chart-1: 225 57% 40%;
+    --chart-2: 41 64% 47%;
+    --chart-3: 142 55% 38%;
+    --chart-4: 0 72% 55%;
+    --chart-5: 268 45% 55%;
+
+    --radius: 0.625rem;
+  }
+
+  .dark {
+    --background: 225 35% 7%;
+    --foreground: 225 15% 94%;
+
+    --card: 225 30% 10%;
+    --card-foreground: 225 15% 94%;
+
+    --popover: 225 30% 10%;
+    --popover-foreground: 225 15% 94%;
+
+    --primary: 225 65% 70%;
+    --primary-foreground: 225 40% 10%;
+
+    --secondary: 225 20% 18%;
+    --secondary-foreground: 225 15% 94%;
+
+    --muted: 225 20% 16%;
+    --muted-foreground: 225 12% 65%;
+
+    --accent: 41 70% 55%;
+    --accent-foreground: 225 40% 10%;
+
+    --destructive: 0 62% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 142 50% 55%;
+    --success-foreground: 225 40% 10%;
+
+    --warning: 38 85% 60%;
+    --warning-foreground: 225 40% 10%;
+
+    --border: 225 20% 22%;
+    --input: 225 20% 22%;
+    --ring: 225 65% 70%;
+
+    --brand-navy: 225 65% 70%;
+    --brand-gold: 41 70% 55%;
+
+    --chart-1: 225 65% 70%;
+    --chart-2: 41 70% 60%;
+    --chart-3: 142 50% 55%;
+    --chart-4: 0 70% 65%;
+    --chart-5: 268 55% 70%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html,
+  body {
+    @apply bg-background text-foreground;
+  }
+  body {
+    font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .bg-grid-slate {
+    background-image:
+      linear-gradient(hsl(var(--border) / 0.6) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--border) / 0.6) 1px, transparent 1px);
+    background-size: 56px 56px;
+  }
+}

@@ -111,60 +111,64 @@ function matrixInverse(X) {
  * Using a simplified approximation for two-tailed test
  */
 function tCriticalValue(df, alpha = 0.05) {
-  // Approximate critical t-values for common df and alpha=0.05 (two-tailed)
-  // Using standard t-table values
+  // Accurate critical t-values for two-tailed α=0.05 from standard t-table
   if (df <= 0) return Infinity;
-  if (df === 1) return 12.706;
-  if (df === 2) return 4.303;
-  if (df === 3) return 3.182;
-  if (df === 4) return 2.776;
-  if (df === 5) return 2.571;
-  if (df <= 10) return 2.228 - (10 - df) * 0.05;
-  if (df <= 20) return 2.086 - (20 - df) * 0.009;
-  if (df <= 30) return 2.042 - (30 - df) * 0.0044;
-  if (df <= 60) return 2.000 - (60 - df) * 0.0014;
-  if (df <= 120) return 1.980 - (120 - df) * 0.00033;
-  return 1.960; // Normal approximation for large df
+  const tTable = {
+    1:12.706, 2:4.303, 3:3.182, 4:2.776, 5:2.571,
+    6:2.447, 7:2.365, 8:2.306, 9:2.262, 10:2.228,
+    11:2.201, 12:2.179, 13:2.160, 14:2.145, 15:2.131,
+    16:2.120, 17:2.110, 18:2.101, 19:2.093, 20:2.086,
+    21:2.080, 22:2.074, 23:2.069, 24:2.064, 25:2.060,
+    26:2.056, 27:2.052, 28:2.048, 29:2.045, 30:2.042,
+    35:2.030, 40:2.021, 45:2.014, 50:2.009, 60:2.000,
+    70:1.994, 80:1.990, 90:1.987, 100:1.984, 120:1.980
+  };
+  if (tTable[df] !== undefined) return tTable[df];
+  // Linear interpolation between nearest known values
+  const keys = Object.keys(tTable).map(Number).sort((a,b) => a - b);
+  if (df > 120) return 1.960;
+  let lo = keys[0], hi = keys[keys.length - 1];
+  for (let i = 0; i < keys.length - 1; i++) {
+    if (keys[i] <= df && keys[i+1] >= df) { lo = keys[i]; hi = keys[i+1]; break; }
+  }
+  const ratio = (df - lo) / (hi - lo);
+  return tTable[lo] + ratio * (tTable[hi] - tTable[lo]);
 }
 
 /**
- * F-distribution critical values (approximate)
- * Using simplified approximation for alpha=0.05
+ * F-distribution upper critical values at α = 0.05.
+ * Uses a full two-dimensional lookup table (df1 = 1–10, df2 = 1–120)
+ * with linear interpolation between breakpoints.
+ * df1 > 10 falls back to the df1 = 10 row (conservative under-rejection).
  */
-function fCriticalValue(df1, df2, alpha = 0.05) {
-  // Approximation for F-critical value
+function fCriticalValue(df1, df2) {
   if (df1 <= 0 || df2 <= 0) return Infinity;
-  // Simplified approximation using common values
-  if (df1 === 1) {
-    if (df2 <= 10) return 4.96;
-    if (df2 <= 20) return 4.35;
-    if (df2 <= 30) return 4.17;
-    if (df2 <= 60) return 4.00;
-    return 3.84;
+  // df2 breakpoints used in every row
+  const df2Pts = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 20, 24, 30, 40, 60, 120];
+  // Critical values at α = 0.05 from standard statistical tables
+  const rows = [
+    /* df1= 1 */[161.4,18.51,10.13,7.71,6.61,5.99,5.59,5.32,5.12,4.96,4.75,4.54,4.35,4.26,4.17,4.08,4.00,3.92],
+    /* df1= 2 */[199.5,19.00, 9.55,6.94,5.79,5.14,4.74,4.46,4.26,4.10,3.89,3.68,3.49,3.40,3.32,3.23,3.15,3.07],
+    /* df1= 3 */[215.7,19.16, 9.28,6.59,5.41,4.76,4.35,4.07,3.86,3.71,3.49,3.29,3.10,3.01,2.92,2.84,2.76,2.68],
+    /* df1= 4 */[224.6,19.25, 9.12,6.39,5.19,4.53,4.12,3.84,3.63,3.48,3.26,3.06,2.87,2.78,2.69,2.61,2.53,2.45],
+    /* df1= 5 */[230.2,19.30, 9.01,6.26,5.05,4.39,3.97,3.69,3.48,3.33,3.11,2.90,2.71,2.62,2.53,2.45,2.37,2.29],
+    /* df1= 6 */[234.0,19.33, 8.94,6.16,4.95,4.28,3.87,3.58,3.37,3.22,3.00,2.79,2.60,2.51,2.42,2.34,2.25,2.17],
+    /* df1= 7 */[236.8,19.35, 8.89,6.09,4.88,4.21,3.79,3.50,3.29,3.14,2.91,2.71,2.51,2.42,2.33,2.25,2.17,2.09],
+    /* df1= 8 */[238.9,19.37, 8.85,6.04,4.82,4.15,3.73,3.44,3.23,3.07,2.85,2.64,2.45,2.36,2.27,2.18,2.10,2.02],
+    /* df1= 9 */[240.5,19.38, 8.81,5.99,4.77,4.10,3.68,3.39,3.18,3.02,2.80,2.59,2.39,2.30,2.21,2.12,2.04,1.96],
+    /* df1=10 */[241.9,19.40, 8.79,5.96,4.74,4.06,3.64,3.35,3.14,2.98,2.75,2.54,2.35,2.25,2.16,2.08,1.99,1.91],
+  ];
+  const rowIdx = Math.min(Math.max(Math.round(df1), 1), 10) - 1;
+  const row = rows[rowIdx];
+  if (df2 <= df2Pts[0]) return row[0];
+  if (df2 >= df2Pts[df2Pts.length - 1]) return row[row.length - 1];
+  for (let i = 0; i < df2Pts.length - 1; i++) {
+    if (df2Pts[i] <= df2 && df2Pts[i + 1] >= df2) {
+      const t = (df2 - df2Pts[i]) / (df2Pts[i + 1] - df2Pts[i]);
+      return row[i] + t * (row[i + 1] - row[i]);
+    }
   }
-  if (df1 === 2) {
-    if (df2 <= 10) return 4.10;
-    if (df2 <= 20) return 3.49;
-    if (df2 <= 30) return 3.32;
-    if (df2 <= 60) return 3.15;
-    return 3.00;
-  }
-  if (df1 === 3) {
-    if (df2 <= 10) return 3.71;
-    if (df2 <= 20) return 3.10;
-    if (df2 <= 30) return 2.92;
-    if (df2 <= 60) return 2.76;
-    return 2.60;
-  }
-  if (df1 <= 5) {
-    if (df2 <= 10) return 3.33;
-    if (df2 <= 20) return 2.71;
-    if (df2 <= 30) return 2.53;
-    if (df2 <= 60) return 2.37;
-    return 2.21;
-  }
-  // General approximation
-  return 2.5;
+  return row[row.length - 1];
 }
 
 // Steps definition
@@ -316,11 +320,44 @@ function processCSVFile(file) {
 // HANDLE LOADED DATA
 // ============================================================
 function handleDataLoaded(json) {
-  STATE.columns = json.columns;
+  clearAlert('dataAlert');
+
+  // Validate empty dataset
+  if (!json.rows || json.rows.length === 0) {
+    showAlert('dataAlert', '⚠️ The dataset is empty. Please provide a file with at least 3 rows of data.', 'danger');
+    return;
+  }
+  if (json.rows.length < 3) {
+    showAlert('dataAlert', '⚠️ The dataset has fewer than 3 rows. Please provide more data for meaningful analysis.', 'danger');
+    return;
+  }
+  // Check for duplicate column names
+  const colSet = new Set(json.columns);
+  if (colSet.size !== json.columns.length) {
+    const dupes = json.columns.filter((c, i) => json.columns.indexOf(c) !== i);
+    showAlert('dataAlert', `⚠️ Duplicate column names detected: "${[...new Set(dupes)].join('", "')}". Please fix the dataset.`, 'danger');
+    return;
+  }
+  // Identify numeric columns (at least one value must be numeric)
+  const numericCols = json.columns.filter(col =>
+    json.rows.some(r => r[col] !== null && r[col] !== undefined && r[col] !== '' && !isNaN(parseFloat(r[col])))
+  );
+  if (numericCols.length < 2) {
+    showAlert('dataAlert', '⚠️ Need at least 2 numeric columns for regression. Check that your data contains numeric values.', 'danger');
+    return;
+  }
+
+  STATE.columns = numericCols;
   STATE.data    = json.rows;
   STATE.results = null;
   STATE.xCols   = [];
   STATE.yCol    = '';
+
+  // Warn if some columns were excluded
+  const excludedCols = json.columns.filter(c => !numericCols.includes(c));
+  if (excludedCols.length > 0) {
+    showAlert('dataAlert', `ℹ️ Non-numeric columns excluded: "${excludedCols.join('", "')}". Only numeric columns are available for regression.`, 'warning');
+  }
 
   // Badges
   const info = document.getElementById('dataInfo');
@@ -443,7 +480,9 @@ function renderYSelect() {
 // ============================================================
 function trainModel() {
   STATE.yCol = document.getElementById('ySelect').value;
+  clearAlert('modelAlert');
 
+  // --- Validation Layer ---
   if (STATE.xCols.length === 0) {
     showAlert('modelAlert','⚠️ Please select at least one X variable.','danger'); return;
   }
@@ -453,55 +492,135 @@ function trainModel() {
   if (STATE.xCols.includes(STATE.yCol)) {
     showAlert('modelAlert','⚠️ X and Y cannot be the same variable.','danger'); return;
   }
-  clearAlert('modelAlert');
+  if (STATE.regType === 'simple' && STATE.xCols.length > 1) {
+    showAlert('modelAlert','⚠️ Simple regression allows only one X variable.','danger'); return;
+  }
+  // Check for duplicate X columns
+  if (new Set(STATE.xCols).size !== STATE.xCols.length) {
+    showAlert('modelAlert','⚠️ Duplicate X variables detected. Please remove duplicates.','danger'); return;
+  }
+  // Check dataset is not empty
+  if (!STATE.data || STATE.data.length === 0) {
+    showAlert('modelAlert','⚠️ No dataset loaded. Please load data first.','danger'); return;
+  }
+  // Validate numeric data in selected columns before training
+  const allCols = [...STATE.xCols, STATE.yCol];
+  const validRows = STATE.data.filter(r =>
+    allCols.every(c => r[c] !== null && r[c] !== undefined && r[c] !== '' && !isNaN(parseFloat(r[c])))
+  );
+  const droppedCount = STATE.data.length - validRows.length;
+  if (validRows.length === 0) {
+    showAlert('modelAlert','⚠️ All rows contain non-numeric or missing values in the selected columns. Cannot train.','danger'); return;
+  }
+  if (validRows.length < STATE.xCols.length + 2) {
+    showAlert('modelAlert',`⚠️ Not enough valid rows (${validRows.length}) for ${STATE.xCols.length} predictor(s). Need at least ${STATE.xCols.length + 2} rows.`,'danger'); return;
+  }
+  // Check for zero-variance in Y
+  const yVals = validRows.map(r => parseFloat(r[STATE.yCol]));
+  const yUnique = new Set(yVals);
+  if (yUnique.size === 1) {
+    showAlert('modelAlert','⚠️ The target variable Y has no variance (all values are the same). Regression is not meaningful.','danger'); return;
+  }
 
   const btn = document.getElementById('trainBtn');
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span> Training...';
 
-  // Pure client-side LSE computation (no backend).
-  const json = computeLocalRegression();
-  if (json) {
-    STATE.results = json;
-    renderResults(json);
-  } else {
-    showAlert('modelAlert',
-      '⚠️ Training failed. Check that selected columns are numeric and that you have enough rows (n > p + 1).',
-      'danger');
-  }
-
-  btn.disabled = false;
-  btn.innerHTML = '🔄 Retrain Model';
-  btn.className = 'btn btn-navy';
-  setTimeout(() => { btn.innerHTML = '🚀 Train Model'; btn.className = 'btn btn-gold'; }, 3000);
+  // Defer by one frame so the spinner repaints before computation begins.
+  setTimeout(() => {
+    const json = computeLocalRegression();
+    if (json) {
+      STATE.results = json;
+      if (droppedCount > 0) {
+        showAlert('modelAlert',`⚠️ ${droppedCount} row(s) with missing/non-numeric values were excluded from training.`,'warning');
+      }
+      renderResults(json);
+    } else {
+      showAlert('modelAlert',
+        '⚠️ Training failed. The matrix may be singular (perfectly collinear predictors) or insufficient rows remain after filtering. Check your column selection.',
+        'danger');
+    }
+    btn.disabled = false;
+    btn.innerHTML = '🔄 Retrain Model';
+    btn.className = 'btn btn-navy';
+    setTimeout(() => { btn.innerHTML = '🚀 Train Model'; btn.className = 'btn btn-gold'; }, 3000);
+  }, 20);
 }
 
 // ============================================================
 // GENERATE RECOMMENDATIONS
 // ============================================================
-function generateRecs(r2, xCols, coefs) {
-  const recs = [];
-  if (r2 >= 0.85)
-    recs.push({type:'success',title:'Strong Relationship',
-      text:`R² = ${r2} — The model explains ${Math.round(r2*100)}% of the variance. Excellent fit!`});
-  else if (r2 >= 0.60)
-    recs.push({type:'warning',title:'Moderate Relationship',
-      text:`R² = ${r2} — The model explains ${Math.round(r2*100)}% of the variance. Consider adding more features.`});
-  else
-    recs.push({type:'danger',title:'Weak Relationship',
-      text:`R² = ${r2} — Only ${Math.round(r2*100)}% of variance explained. Try different variables or more data.`});
+function generateRecs(r2, xCols, coefs, extraInfo) {
+  const recs  = [];
+  const r2Pct = Math.round(r2 * 100);
+  const r2Str = r2.toFixed(3);
+  // yCol is passed via extraInfo so coefficient text can name the outcome variable
+  const yLabel = (extraInfo && extraInfo.yCol) ? extraInfo.yCol : 'Y';
 
-  if (coefs.length > 1) {
-    const best = coefs.reduce((a,b) => Math.abs(a.val) > Math.abs(b.val) ? a : b);
-    recs.push({type:'info',title:'Most Influential Feature',
-      text:`"${best.col}" has the largest impact with coefficient ${best.val.toFixed(4)}.`});
+  // 1. R² Interpretation
+  if (r2 >= 0.85)
+    recs.push({type:'success', title:'Excellent Model Fit',
+      text:`R² = ${r2Str} — The model explains ${r2Pct}% of the variance in "${yLabel}". This indicates a strong linear relationship between the selected predictors and the outcome.`});
+  else if (r2 >= 0.60)
+    recs.push({type:'warning', title:'Moderate Model Fit',
+      text:`R² = ${r2Str} — The model explains ${r2Pct}% of the variance in "${yLabel}". The remaining ${100 - r2Pct}% is unexplained. Consider adding more predictive features or investigating non-linear relationships.`});
+  else
+    recs.push({type:'danger', title:'Weak Model Fit',
+      text:`R² = ${r2Str} — Only ${r2Pct}% of the variance in "${yLabel}" is explained. The linear model may not capture the underlying pattern. Consider transforming variables, adding interaction terms, or exploring a non-linear model.`});
+
+  // 2. Coefficient Interpretation — direction and effect size per predictor
+  const sorted = [...coefs].sort((a, b) => Math.abs(b.val) - Math.abs(a.val));
+  sorted.forEach(c => {
+    const direction = c.val > 0 ? 'increases' : 'decreases';
+    const arrow     = c.val > 0 ? '↑' : '↓';
+    const signedStr = `${c.val >= 0 ? '+' : ''}${c.val.toFixed(3)}`;
+    recs.push({
+      type:  'info',
+      title: `${arrow} ${c.col}  (β = ${signedStr})`,
+      text:  `For each 1-unit increase in "${c.col}", the predicted "${yLabel}" ${direction} by ${Math.abs(c.val).toFixed(3)} units${xCols.length > 1 ? ', holding all other predictors constant' : ''}.`
+    });
+  });
+
+  // 3. Feature Influence Ranking (only meaningful with 2+ predictors)
+  if (sorted.length > 1) {
+    const best  = sorted[0];
+    const worst = sorted[sorted.length - 1];
+    recs.push({type:'info', title:'Feature Influence Ranking',
+      text:`Strongest predictor: "${best.col}" (|β| = ${Math.abs(best.val).toFixed(3)}). Weakest predictor: "${worst.col}" (|β| = ${Math.abs(worst.val).toFixed(3)}). Note: rankings reflect raw coefficient magnitudes and depend on variable scale.`});
   }
 
-  recs.push(r2 >= 0.75
-    ? {type:'success',title:'Model Suitability',text:'The model is a good fit. You can use it for predictions confidently.'}
-    : {type:'warning',title:'Model Needs Improvement',text:'Try collecting more data, removing outliers, or engineering new features.'});
+  // 4. Model Suitability Assessment
+  if (r2 >= 0.75) {
+    recs.push({type:'success', title:'Model Suitable for Prediction',
+      text:`R² = ${r2Str} — The model explains most of the variance and can be used for predictions within the observed data range. Avoid extrapolating beyond the range of the training data.`});
+  } else if (r2 >= 0.40) {
+    recs.push({type:'warning', title:'Model Needs Improvement',
+      text:'The model captures some patterns but leaves substantial variance unexplained. Suggested actions: (1) add more relevant predictors, (2) check for and remove outliers, (3) investigate non-linear relationships, (4) increase the sample size.'});
+  } else {
+    recs.push({type:'danger', title:'Model Inadequate for Prediction',
+      text:'The linear model fits the data poorly. Possible causes: (1) the true relationship is non-linear, (2) key predictors are missing, or (3) the data contains significant noise or outliers. Consider polynomial regression or additional feature engineering.'});
+  }
 
-  recs.push({type:'success',title:'Data Quality',text:'Dataset is clean and ready for analysis. No critical issues detected.'});
+  // 5. Sample Size Analysis
+  const n = extraInfo && extraInfo.n ? extraInfo.n : 0;
+  const p = extraInfo && extraInfo.k ? extraInfo.k : xCols.length;
+  if (n > 0 && n < 10 * p) {
+    recs.push({type:'warning', title:'Small Sample Size Warning',
+      text:`The dataset has ${n} observations for ${p} predictor(s). Statistical guidelines recommend at least 10–20 observations per predictor for stable and reliable coefficient estimates. Consider collecting more data.`});
+  } else if (n > 0) {
+    recs.push({type:'success', title:'Adequate Sample Size',
+      text:`${n} observations for ${p} predictor(s) provides a healthy observation-to-predictor ratio, supporting reliable coefficient estimation.`});
+  }
+
+  // 6. Targeted Improvement Suggestions
+  const suggestions = [];
+  if (r2 < 0.85) suggestions.push('include additional predictors that may explain more variance');
+  if (n > 0 && n < 50) suggestions.push(`collect more observations (current: ${n}; recommended: 50+)`);
+  if (sorted.some(c => Math.abs(c.val) < 0.001)) suggestions.push('consider removing near-zero-coefficient predictors — they contribute negligible predictive value');
+  if (suggestions.length > 0) {
+    recs.push({type:'info', title:'Improvement Suggestions',
+      text:`To strengthen this model: ${suggestions.join('; ')}.`});
+  }
 
   return recs;
 }
@@ -517,42 +636,90 @@ function destroyChart(id) {
 }
 
 function renderCharts(json) {
-  const sorted = [...json.scatter_data].sort((a,b) => a.x - b.x);
+  const isMultiple = STATE.xCols.length > 1;
 
   // --- Chart 1: Scatter + Regression Line ---
   destroyChart('scatterChart');
   const scatterCtx = document.getElementById('scatterChart').getContext('2d');
-  STATE.chartInstances['scatterChart'] = new Chart(scatterCtx, {
-    type:'scatter',
-    data:{
-      datasets:[
-        {
-          label:'Actual Data',
-          data: sorted.map(d => ({x:d.x, y:d.y})),
-          backgroundColor:'rgba(27,42,94,0.7)',
-          pointRadius:5, pointHoverRadius:7
-        },
-        {
-          label:'Regression Line',
-          data:[
-            {x:sorted[0].x, y:sorted[0].predicted},
-            {x:sorted[sorted.length-1].x, y:sorted[sorted.length-1].predicted}
-          ],
-          type:'line', borderColor:'#C8972B',
-          borderWidth:3, pointRadius:0,
-          fill:false, tension:0
+
+  if (isMultiple) {
+    // Multiple regression: show Predicted vs Actual with perfect-fit 45° line
+    const avpData = json.actual_vs_pred.map(d => ({x: d.predicted, y: d.actual}));
+    const allVals = avpData.flatMap(d => [d.x, d.y]);
+    const minVal = Math.min(...allVals);
+    const maxVal = Math.max(...allVals);
+    STATE.chartInstances['scatterChart'] = new Chart(scatterCtx, {
+      type:'scatter',
+      data:{
+        datasets:[
+          {
+            label:'Predicted vs Actual',
+            data: avpData,
+            backgroundColor:'rgba(27,42,94,0.7)',
+            pointRadius:5, pointHoverRadius:7
+          },
+          {
+            label:'Perfect Fit (45° line)',
+            data:[{x:minVal, y:minVal},{x:maxVal, y:maxVal}],
+            type:'line', borderColor:'#C8972B',
+            borderWidth:3, pointRadius:0,
+            fill:false, tension:0, borderDash:[6,3]
+          }
+        ]
+      },
+      options:{
+        responsive:true, animation:{duration:800},
+        plugins:{legend:{labels:{font:{size:11},boxWidth:14}}},
+        scales:{
+          x:{grid:{color:'#e5e7eb'},ticks:{font:{size:10}},title:{display:true,text:'Predicted',font:{size:11}}},
+          y:{grid:{color:'#e5e7eb'},ticks:{font:{size:10}},title:{display:true,text:'Actual',font:{size:11}}}
         }
-      ]
-    },
-    options:{
-      responsive:true, animation:{duration:800},
-      plugins:{legend:{labels:{font:{size:11},boxWidth:14}}},
-      scales:{
-        x:{grid:{color:'#e5e7eb'},ticks:{font:{size:10}},title:{display:true,text:'X (Input)',font:{size:11}}},
-        y:{grid:{color:'#e5e7eb'},ticks:{font:{size:10}},title:{display:true,text:'Y (Output)',font:{size:11}}}
       }
-    }
-  });
+    });
+  } else {
+    // Simple regression: show X vs Y scatter with regression line
+    const sorted = [...json.scatter_data].sort((a,b) => a.x - b.x);
+    STATE.chartInstances['scatterChart'] = new Chart(scatterCtx, {
+      type:'scatter',
+      data:{
+        datasets:[
+          {
+            label:'Actual Data',
+            data: sorted.map(d => ({x:d.x, y:d.y})),
+            backgroundColor:'rgba(27,42,94,0.7)',
+            pointRadius:5, pointHoverRadius:7
+          },
+          {
+            label:'Regression Line',
+            data:[
+              {x:sorted[0].x, y:sorted[0].predicted},
+              {x:sorted[sorted.length-1].x, y:sorted[sorted.length-1].predicted}
+            ],
+            type:'line', borderColor:'#C8972B',
+            borderWidth:3, pointRadius:0,
+            fill:false, tension:0
+          }
+        ]
+      },
+      options:{
+        responsive:true, animation:{duration:800},
+        plugins:{legend:{labels:{font:{size:11},boxWidth:14}}},
+        scales:{
+          x:{grid:{color:'#e5e7eb'},ticks:{font:{size:10}},title:{display:true,text:STATE.xCols[0] || 'X (Input)',font:{size:11}}},
+          y:{grid:{color:'#e5e7eb'},ticks:{font:{size:10}},title:{display:true,text:STATE.yCol || 'Y (Output)',font:{size:11}}}
+        }
+      }
+    });
+  }
+
+  // Update scatter chart panel title to reflect what is being plotted
+  const scatterTitleEl = document.getElementById('scatterChart')
+    ?.closest('.chart-box')?.querySelector('.chart-title');
+  if (scatterTitleEl) {
+    scatterTitleEl.textContent = isMultiple
+      ? '\uD83C\uDFAF Predicted vs Actual Scatter'
+      : `\uD83D\uDCCD ${STATE.xCols[0] || 'X'} vs ${STATE.yCol || 'Y'}`;
+  }
 
   // --- Chart 2: Actual vs Predicted ---
   destroyChart('avpChart');
@@ -580,7 +747,7 @@ function renderCharts(json) {
       plugins:{legend:{labels:{font:{size:11},boxWidth:14}}},
       scales:{
         x:{grid:{color:'#e5e7eb'},ticks:{font:{size:9}}},
-        y:{grid:{color:'#e5e7eb'},ticks:{font:{size:10}}}
+        y:{grid:{color:'#e5e7eb'},ticks:{font:{size:10}}, title:{display:true, text:STATE.yCol || 'Y (Output)', font:{size:11}}}
       }
     }
   });
@@ -635,26 +802,32 @@ function renderEvaluation(json) {
   document.getElementById('r2Pct').textContent   = r2Pct + '%';
   document.getElementById('r2Pct').style.color   = r2Color;
   document.getElementById('r2Desc').textContent  =
-    `The model explains ${r2Pct}% of the variance in the output variable.`;
+    `The model explains ${r2Pct}% of the variance in "${STATE.yCol || 'the output variable'}".`;
 
-  const bar = document.getElementById('r2Bar');
-  bar.style.background = `linear-gradient(90deg,${r2Color},${r2Color}99)`;
-  bar.style.width = '0%';
-  setTimeout(() => bar.style.width = r2Pct + '%', 200);
 
   // MSE / RMSE only (removed MAE and Adj R² per syllabus)
-  const fmt = v => typeof v === 'number' ? (v > 999 ? v.toFixed(2) : v.toFixed(4)) : v;
+  // Safe number formatter: guards NaN/Infinity, formats large numbers readably
+  const fmtNum = v => {
+    if (v === null || v === undefined || !isFinite(v) || isNaN(v)) return '\u2014';
+    const abs = Math.abs(v);
+    if (abs >= 1e9)  return v.toExponential(2);
+    if (abs >= 1e6)  return Math.round(v).toLocaleString('en');
+    if (abs >= 1000) return v.toLocaleString('en', {minimumFractionDigits:2, maximumFractionDigits:2});
+    if (abs > 0 && abs < 0.0001) return v.toExponential(3);
+    return v.toFixed(4);
+  };
   document.getElementById('metricsRow').innerHTML = `
     <div class="metric-box">
-      <div class="metric-val">${fmt(mse)}</div>
+      <div class="metric-val">${fmtNum(mse)}</div>
       <div class="metric-name">MSE</div>
       <div class="metric-sub">Mean Squared Error</div>
     </div>
     <div class="metric-box">
-      <div class="metric-val">${fmt(rmse)}</div>
+      <div class="metric-val">${fmtNum(rmse)}</div>
       <div class="metric-name">RMSE</div>
       <div class="metric-sub">Root MSE — same unit as Y</div>
-    </div>`;
+    </div>
+  `;
 
   // Equation
   document.getElementById('equationBox').textContent = equation;
@@ -662,7 +835,7 @@ function renderEvaluation(json) {
   // Standard Error of Estimate
   document.getElementById('seBox').innerHTML = `
     <div>
-      <div class="se-value">${fmt(se)}</div>
+      <div class="se-value">${fmtNum(se)}</div>
       <div class="se-label">Standard Error of Estimate (SE)</div>
     </div>
     <div class="se-desc">Average distance between observed values and the regression line. Lower SE = better fit.</div>
@@ -689,10 +862,10 @@ function renderEvaluation(json) {
           <tr>
             <td><strong>Regression</strong></td>
             <td>${anova.dfRegression}</td>
-            <td>${anova.ssRegression.toFixed(4)}</td>
-            <td>${anova.msRegression.toFixed(4)}</td>
+            <td>${fmtNum(anova.ssRegression)}</td>
+            <td>${fmtNum(anova.msRegression)}</td>
             <td rowspan="2" style="text-align:center;font-size:1.1rem;">
-              <div style="font-weight:800;">${anova.fStatistic.toFixed(4)}</div>
+              <div style="font-weight:800;">${anova.fStatistic.toFixed(3)}</div>
               <div style="font-size:0.75rem;color:var(--muted);">F-critical = ${fCrit}</div>
               <div style="font-size:0.75rem;" class="${fClass}">${fSig}</div>
             </td>
@@ -700,21 +873,24 @@ function renderEvaluation(json) {
           <tr>
             <td><strong>Residual (Error)</strong></td>
             <td>${anova.dfResidual}</td>
-            <td>${anova.ssResidual.toFixed(4)}</td>
-            <td>${anova.msResidual.toFixed(4)}</td>
+            <td>${fmtNum(anova.ssResidual)}</td>
+            <td>${fmtNum(anova.msResidual)}</td>
           </tr>
           <tr class="anova-total">
             <td><strong>Total</strong></td>
             <td>${anova.dfTotal}</td>
-            <td>${anova.ssTotal.toFixed(4)}</td>
+            <td>${fmtNum(anova.ssTotal)}</td>
             <td>—</td>
             <td>—</td>
           </tr>
         </tbody>
       </table>
       <div style="margin-top:10px;font-size:0.8rem;color:var(--muted);">
-        <strong>F = MSR/MSE = ${anova.msRegression.toFixed(4)}/${anova.msResidual.toFixed(4)} = ${anova.fStatistic.toFixed(4)}</strong>
-        <br>F > F-critical (${fCrit}) indicates the model is statistically significant at α = 0.05
+        <strong>F = MSR / MSE = ${fmtNum(anova.msRegression)} / ${fmtNum(anova.msResidual)} = ${anova.fStatistic.toFixed(3)}</strong>
+        &nbsp;&nbsp;(F-critical at α=0.05: ${fCrit})
+        <br>${anova.fStatistic > anova.fCritical
+          ? '→ F > F-critical: Reject H₀ — the overall regression model is statistically significant.'
+          : '→ F ≤ F-critical: Fail to reject H₀ — the overall regression model is not statistically significant.'}
       </div>
     `;
   }
@@ -735,7 +911,8 @@ function renderEvaluation(json) {
             <th>Decision</th>
           </tr>
         </thead>
-        <tbody>`;
+        <tbody>
+    `;
 
     // Intercept
     const interceptSig = Math.abs(ttest.intercept.tStat) > ttest.criticalValue;
@@ -743,12 +920,13 @@ function renderEvaluation(json) {
       <tr class="${interceptSig ? 'ttest-sig' : 'ttest-not-sig'}">
         <td><strong>β₀ (Intercept)</strong></td>
         <td>—</td>
-        <td>${ttest.intercept.estimate.toFixed(4)}</td>
-        <td>${ttest.intercept.stdError.toFixed(4)}</td>
+        <td>${fmtNum(ttest.intercept.estimate)}</td>
+        <td>${fmtNum(ttest.intercept.stdError)}</td>
         <td>${ttest.intercept.tStat.toFixed(4)}</td>
         <td>±${tCrit}</td>
         <td>${interceptSig ? 'Significant ✓' : 'Not Significant'}</td>
-      </tr>`;
+      </tr>
+    `;
 
     // Slopes
     ttest.slopes.forEach((s, i) => {
@@ -757,19 +935,21 @@ function renderEvaluation(json) {
         <tr class="${slopeSig ? 'ttest-sig' : 'ttest-not-sig'}">
           <td><strong>β${i+1}</strong></td>
           <td>${s.variable}</td>
-          <td>${s.estimate.toFixed(4)}</td>
-          <td>${s.stdError.toFixed(4)}</td>
+          <td>${fmtNum(s.estimate)}</td>
+          <td>${fmtNum(s.stdError)}</td>
           <td>${s.tStat.toFixed(4)}</td>
           <td>±${tCrit}</td>
           <td>${slopeSig ? 'Significant ✓' : 'Not Significant'}</td>
-        </tr>`;
+        </tr>
+      `;
     });
 
     tHtml += `</tbody></table>
       <div style="margin-top:10px;font-size:0.8rem;color:var(--muted);">
-        <strong>H₀: β = 0 (no effect) vs H₁: β ≠ 0 (significant effect)</strong>
-        <br>Reject H₀ if |t| > t-critical. Degrees of freedom = ${ttest.df}
-      </div>`;
+        <strong>H₀: β = 0 (no effect) | H₁: β ≠ 0 (coefficient is significant)</strong>
+        <br>Decision rule: Reject H₀ when |t-statistic| > t-critical (±${tCrit}). Degrees of freedom = ${ttest.df}.
+      </div>
+    `;
     document.getElementById('tTestTable').innerHTML = tHtml;
   }
 
@@ -787,7 +967,8 @@ function renderEvaluation(json) {
             <th>CI Width</th>
           </tr>
         </thead>
-        <tbody>`;
+        <tbody>
+    `;
 
     // Intercept CI
     const ci = confidenceIntervals.intercept;
@@ -795,11 +976,12 @@ function renderEvaluation(json) {
       <tr>
         <td><strong>β₀ (Intercept)</strong></td>
         <td>—</td>
-        <td>${ci.estimate.toFixed(4)}</td>
-        <td class="ci-interval" style="color:#ef4444;">${ci.lower.toFixed(4)}</td>
-        <td class="ci-interval" style="color:#10b981;">${ci.upper.toFixed(4)}</td>
-        <td>${(ci.upper - ci.lower).toFixed(4)}</td>
-      </tr>`;
+        <td>${fmtNum(ci.estimate)}</td>
+        <td class="ci-interval" style="color:#ef4444;">${fmtNum(ci.lower)}</td>
+        <td class="ci-interval" style="color:#10b981;">${fmtNum(ci.upper)}</td>
+        <td>${fmtNum(ci.upper - ci.lower)}</td>
+      </tr>
+    `;
 
     // Slopes CI
     confidenceIntervals.slopes.forEach((s, i) => {
@@ -807,11 +989,12 @@ function renderEvaluation(json) {
         <tr>
           <td><strong>β${i+1}</strong></td>
           <td>${s.variable}</td>
-          <td>${s.estimate.toFixed(4)}</td>
-          <td class="ci-interval" style="color:#ef4444;">${s.lower.toFixed(4)}</td>
-          <td class="ci-interval" style="color:#10b981;">${s.upper.toFixed(4)}</td>
-          <td>${(s.upper - s.lower).toFixed(4)}</td>
-        </tr>`;
+          <td>${fmtNum(s.estimate)}</td>
+          <td class="ci-interval" style="color:#ef4444;">${fmtNum(s.lower)}</td>
+          <td class="ci-interval" style="color:#10b981;">${fmtNum(s.upper)}</td>
+          <td>${fmtNum(s.upper - s.lower)}</td>
+        </tr>
+      `;
     });
 
     ciHtml += `</tbody></table>
@@ -949,6 +1132,7 @@ function computeLocalRegression() {
       betas = [beta0, beta1];
     } else {
       betas = multipleRegression(Xmat, y);
+      if (betas.some(b => !isFinite(b))) return null; // singular / ill-conditioned matrix
     }
     const intercept = betas[0];
     const coefs     = betas.slice(1);
@@ -961,7 +1145,8 @@ function computeLocalRegression() {
     const yMean  = y.reduce((a,b)=>a+b,0)/n;
     const ssTot  = y.reduce((a,b)=>a+(b-yMean)**2,0);
     const ssRes  = residuals.reduce((a,r)=>a+r*r,0);
-    const r2     = ssTot>0 ? 1-ssRes/ssTot : 0;
+    const r2Raw  = ssTot>0 ? 1-ssRes/ssTot : 0;
+    const r2     = Math.max(0, Math.min(1, r2Raw));
     const mse    = ssRes/(n - p - 1); // Unbiased MSE (df = n - p - 1)
     const rmse   = Math.sqrt(mse);
     const se     = Math.sqrt(mse); // Standard Error of Estimate
@@ -996,7 +1181,7 @@ function computeLocalRegression() {
     const diagXtX_inv = matrixDiagonal(XtX_inv);
 
     // Standard errors of coefficients
-    const coefStdErrors = diagXtX_inv.map(d => Math.sqrt(mse * d));
+    const coefStdErrors = diagXtX_inv.map(d => Math.sqrt(Math.max(0, mse * d)));
     const tCritical = tCriticalValue(dfRes);
 
     // t-statistics: t = β / SE(β)
@@ -1034,10 +1219,18 @@ function computeLocalRegression() {
     };
 
     // ========== EQUATION STRING ==========
-    let eq = `${yCol} = ${intercept.toFixed(4)}`;
-    xCols.forEach((c,i)=>{
-      const s = coefs[i]>=0?'+':'-';
-      eq += ` ${s} ${Math.abs(coefs[i]).toFixed(4)}×${c}`;
+    // Professional format: ŷ (Y) = b₀ + (b₁ × X₁) − (b₂ × X₂)
+    const fmtCoef = v => {
+      if (!isFinite(v)) return '0';
+      const abs = Math.abs(v);
+      if (abs >= 10000) return Math.round(v).toLocaleString('en');
+      if (abs >= 100)   return v.toFixed(2);
+      return v.toFixed(3);
+    };
+    let eq = `\u0177 (${yCol}) = ${fmtCoef(intercept)}`;
+    xCols.forEach((c, i) => {
+      const sign = coefs[i] >= 0 ? ' + ' : ' \u2212 ';
+      eq += `${sign}(${fmtCoef(Math.abs(coefs[i]))} \u00d7 ${c})`;
     });
 
     // ========== VISUALIZATION DATA ==========
@@ -1052,7 +1245,7 @@ function computeLocalRegression() {
     xCols.forEach((c,i)=>coefficients[c]=parseFloat(coefs[i].toFixed(4)));
 
     const recs = generateRecs(r2, xCols,
-      xCols.map((c,i)=>({col:c,val:coefs[i]})));
+      xCols.map((c,i)=>({col:c,val:coefs[i]})), {n, k: p, yCol});
 
     return {
       r2: parseFloat(r2.toFixed(4)),

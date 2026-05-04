@@ -273,7 +273,8 @@ main {
   box-shadow:0 8px 30px rgba(200,151,43,0.6);
 }
 .btn-gold:active{transform:scale(0.97);}
-.btn:disabled{opacity:0.5;cursor:not-allowed;transform:none!important;}
+.btn:disabled{opacity:0.5;cursor:not-allowed;transform:none!important;box-shadow:none!important;animation:none!important;}
+.btn:focus-visible{outline:3px solid var(--gold);outline-offset:2px;}
 .btn-sm{padding:7px 16px;font-size:0.82rem;}
 
 /* ============================================================
@@ -434,6 +435,7 @@ select:focus{ border-color:var(--navy); box-shadow:0 0 0 3px rgba(27,42,94,0.1);
   user-select:none;
 }
 .pill:hover{border-color:var(--navy);background:#eef2ff;}
+.pill:focus-visible{outline:3px solid var(--gold);outline-offset:2px;}
 .pill.selected {
   background:linear-gradient(135deg,var(--navy),var(--navy3));
   color:var(--white); border-color:var(--navy);
@@ -600,6 +602,7 @@ select:focus{ border-color:var(--navy); box-shadow:0 0 0 3px rgba(27,42,94,0.1);
 }
 .alert-danger{background:#fee2e2;color:#991b1b;border-left:4px solid var(--danger);}
 .alert-success{background:#d1fae5;color:#065f46;border-left:4px solid var(--success);}
+.alert-warning{background:#fef3c7;color:#92400e;border-left:4px solid var(--warning);}
 
 /* ============================================================
    FOOTER
